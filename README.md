@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-# Genaro
-Digital Footprint Tracking ver. 2.0
-=======
 # Genaro DFT 2.0 Knowledge Base
 
 Genaro DFT 2.0 documents the predictive and agentic reputation platform described in `Genaro.md`.
@@ -75,4 +71,3 @@ The application now features fully responsive design that automatically adapts t
   and validation evidence in every pull request.
 - Link related issues with `Refs #ID` and note follow-up tasks with a checklist before merging.
 - Verify that any agent or orchestrator change leaves `Agents.md` accurate and updated with new assets.
->>>>>>> fff5496 (docs: sync dark mockups and guidelines)
