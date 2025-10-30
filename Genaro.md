@@ -15,6 +15,8 @@ Perception Agents: análisis multimodal (texto, imagen, audio, video) con detecc
 Analytics Agents: correlación entre datos financieros, reputacionales y narrativos.
 Content Agents: generación de mensajes estratégicos (desde comunicados de prensa hasta microcontenido social).
 Action Agents: ejecución automatizada en plataformas externas (anuncios, redes sociales, canales de servicio).
+Ethical Guardian Agent: audita de forma continua las acciones y recomendaciones de la flota para garantizar el alineamiento con marcos éticos y de cumplimiento, reduciendo el riesgo de errores reputacionales por parte de la IA.
+Regulatory Watchdog Agent: monitorea proactivamente cambios en legislaciones y normativas relevantes, actualizando automáticamente las barreras de cumplimiento para los agentes de Contenido y Acción.
 Orchestrator: el “conductor” que coordina la flota de agentes según los objetivos estratégicos definidos por el usuario.
 3. Digital Sandbox Studio
 Un entorno simulado donde se pueden probar estrategias antes de aplicarlas:
@@ -22,8 +24,10 @@ Clonación de escenarios: replicación fiel del entorno digital actual.
 Proyección generativa de outcomes: IA que simula la reacción de audiencias y medios.
 A/B Strategy Testing: pruebas comparativas con métricas proyectadas de ROI, reputación y riesgo.
 Contramedidas competitivas: modelado de reacciones probables de competidores.
+Simulación Adversaria Automatizada (Red Teaming): un agente adversario inteligente intenta contrarrestar activamente las estrategias probadas, revelando debilidades antes del despliegue en un entorno competitivo realista.
 4. Prescriptive Intelligence Engine
 Va más allá de alertar: propone rutas de acción priorizadas.
+Motor de Inferencia Causal: va más allá de la correlación para identificar las causas raíz de los eventos, permitiendo recomendaciones con un mayor grado de confianza y efectividad.
 Motor de recomendaciones con ranking de acciones.
 Ejecución autónoma (con aprobación HITL – Human in the Loop).
 Aprendizaje continuo en ciclo cerrado para optimizar estrategias en tiempo real.
@@ -32,7 +36,7 @@ Un panel integral para:
 Visualizar métricas predictivas.
 Monitorear narrativas en tiempo real.
 Gestionar aprobaciones ejecutivas.
-Interactuar con el sistema vía consultas en lenguaje natural.
+Interactuar con el sistema vía Comando y Control por Lenguaje Natural, permitiendo a los ejecutivos emitir directivas complejas como "Genaro, diseña tres respuestas a la narrativa emergente, pruébalas en el sandbox y preséntame los resultados en una hora".
 Vertical Applications
 Comunicación y Marketing
 Simulación de lanzamientos de productos.
@@ -72,7 +76,7 @@ Playbook táctico: contranarrativas, microsegmentación, activación de influenc
 Conclusion: The Strategic Advantage
 Genaro DFT 2.0 no es una herramienta de monitoreo. Es una capacidad estratégica para las organizaciones que buscan anticipar crisis, defender su reputación y optimizar sus inversiones en un entorno de alta complejidad.
 Anticipar: ver amenazas antes de que escalen.
-Decidir con confianza: basar decisiones en simulaciones cuantificadas.
-Ejecutar con precisión: desplegar estrategias multicanal optimizadas por IA.
+Decidir con confianza: basar decisiones en simulaciones cuantificadas y causalmente informadas.
+Ejecutar con precisión: desplegar estrategias multicanal optimizadas y éticamente auditadas por IA.
 Construir resiliencia: blindar la reputación con capacidades predictivas.
 Genaro transforma el riesgo en ventaja competitiva.
