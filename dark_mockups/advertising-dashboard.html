@@ -9,7 +9,7 @@
   <title>Genaro — Advertising Intelligence</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body data-page="advertising" class="page-shell">
+<body data-page="advertising" data-narrative-id="nar-global-ops" data-brand-id="brand-genaro" class="page-shell">
   <a class="skip-link" href="#main">Skip to main content</a>
   <header class="top-bar">
     <div class="brand">
@@ -38,7 +38,13 @@
         "briefing">Executive Briefing</a> <a href=
         "advertising-dashboard.html" data-nav=
         "advertising">Advertising Dashboard</a>
-      </nav>
+      </nav><button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true" data-theme-toggle-icon>🌙</span>
+        <span class="sr-only" data-theme-toggle-label>Switch to Light Theme</span>
+      </button><button class="layout-toggle" type="button" data-layout-toggle aria-pressed="false">
+        <span class="sr-only" data-layout-toggle-label>Expand layout</span>
+        <span aria-hidden="true">⇱</span>
+      </button>
       <div class="status-pill status-pill--amber">
         Window: Last 7 Days
       </div>
@@ -288,6 +294,7 @@
   "https://cdn.jsdelivr.net/npm/tippy.js@6/dist/tippy-bundle.umd.min.js"
   defer></script> 
   <script src="https://cdn.jsdelivr.net/npm/d3@7" defer></script> 
+  <script src="mock-api.js" defer></script> 
   <script src="charts.js" defer></script> 
   <script src="app.js" defer></script>
 </body>

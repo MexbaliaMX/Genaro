@@ -32,6 +32,13 @@ dark_mockups/
 
 > **Note:** The Three.js globe requires WebGL; a fallback message is shown if WebGL is unavailable.
 
+### Configuring Mock Data Sources
+
+Each HTML shell declares the dataset it should display via `data-narrative-id` and
+`data-brand-id` attributes on the `<body>` element. Update those values to simulate a different
+narrative or brand without editing the JavaScript. `charts.js` reads the attributes automatically
+and falls back to `nar-global-ops` / `brand-genaro` when they are omitted.
+
 ## Features
 
 - **Unified Command Dashboard:** KPI tiles, global threat gauge, D3 heatmap and Three.js narrative
@@ -50,6 +57,14 @@ dark_mockups/
 - All charts currently render synthetic demo data. The `charts.js` module is designed to accept real
   data via a future `dataService`. See `IntegrationLayer.md` and `api/openapi.yaml` for contract
   guidance.
+- Mock values are deterministic and seeded via Mulberry32 in `mock-api.js`, so page refreshes produce
+  stable KPI series and make visual snapshots comparable.
+- Animations respect `prefers-reduced-motion`; the globe stops rotating and force-directed networks
+  settle instantly when the OS setting is enabled.
+- Users can toggle between dark/light modes via the “Theme” button; the selection persists in
+  `localStorage` (default is dark) and falls back to the stored value on reload.
+- A companion “Expand layout” button lets you remove the max-width container on large displays. The
+  preference is also stored (default is the centered layout).
 - Key UX controls (filters, AI actions, “Generate Counter-Narrative”, etc.) are presently static.
   Hook them to backend endpoints or mock handlers when APIs are available.
 - Accessibility audits (Lighthouse/axe) are recommended before production rollout.

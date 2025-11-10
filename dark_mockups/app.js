@@ -1,4 +1,12 @@
+const SHEPHERD_JS_SRC = "https://cdn.jsdelivr.net/npm/shepherd.js@8.5.1/dist/js/shepherd.min.js";
+const SHEPHERD_CSS_SRC = "https://cdn.jsdelivr.net/npm/shepherd.js@8.5.1/dist/css/shepherd.css";
+const THEME_STORAGE_KEY = "genaroTheme";
+const LAYOUT_STORAGE_KEY = "genaroLayout";
+let shepherdLoaderPromise = null;
+
 document.addEventListener("DOMContentLoaded", () => {
+  initThemeToggle();
+  initLayoutToggle();
   if (typeof dayjs !== "undefined") {
     dayjs.extend(dayjs_plugin_utc);
     dayjs.extend(dayjs_plugin_timezone);
@@ -51,6 +59,33 @@ document.addEventListener("DOMContentLoaded", () => {
   initShepherdTour();
 });
 
+function initThemeToggle() {
+  const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  const initialTheme = storedTheme || "dark";
+  applyTheme(initialTheme);
+
+  document.querySelectorAll("[data-theme-toggle]").forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const nextTheme = (document.body.dataset.theme || "dark") === "light" ? "dark" : "light";
+      applyTheme(nextTheme);
+    });
+  });
+}
+
+function applyTheme(theme) {
+  document.body.dataset.theme = theme;
+  document.documentElement.dataset.theme = theme;
+  localStorage.setItem(THEME_STORAGE_KEY, theme);
+  const isLight = theme === "light";
+  document.querySelectorAll("[data-theme-toggle]").forEach((toggle) => {
+    toggle.setAttribute("aria-pressed", String(isLight));
+    const icon = toggle.querySelector("[data-theme-toggle-icon]");
+    if (icon) icon.textContent = isLight ? "☀️" : "🌙";
+    const label = toggle.querySelector("[data-theme-toggle-label]");
+    if (label) label.textContent = isLight ? "Switch to Dark Theme" : "Switch to Light Theme";
+  });
+}
+
 function animateKpis() {
   const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
   if (typeof anime === "undefined") return;
@@ -70,7 +105,7 @@ function animateKpis() {
 
     const decimals = (numericRaw.split(".")[1] || "").length;
     const showPlus = match[0].trim().startsWith("+");
-    const formatter = new Intl.NumberFormat("en-US", {
+    const formatter = new Intl.NumberFormat(navigator.language || "en-US", {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });
@@ -144,74 +179,156 @@ function animateCardsOnScroll() {
   });
 }
 
+function initLayoutToggle() {
+  const storedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
+  const initialLayout = storedLayout || "standard";
+  applyLayout(initialLayout);
+
+  document.querySelectorAll("[data-layout-toggle]").forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const nextLayout = (document.body.dataset.layout || "standard") === "wide" ? "standard" : "wide";
+      applyLayout(nextLayout);
+    });
+  });
+}
+
+function applyLayout(layout) {
+  document.body.dataset.layout = layout;
+  localStorage.setItem(LAYOUT_STORAGE_KEY, layout);
+  const isWide = layout === "wide";
+  document.querySelectorAll("[data-layout-toggle]").forEach((toggle) => {
+    toggle.setAttribute("aria-pressed", String(isWide));
+    const label = toggle.querySelector("[data-layout-toggle-label]");
+    if (label) label.textContent = isWide ? "Collapse layout" : "Expand layout";
+  });
+}
+
 function initShepherdTour() {
-  if (typeof Shepherd === "undefined") return;
   if (document.body.dataset.page !== "dashboard") return;
 
-  const tour = new Shepherd.Tour({
-    useModalOverlay: true,
-    defaultStepOptions: {
-      cancelIcon: { enabled: true },
-      classes: "shepherd-theme-arrows",
-      scrollTo: { behavior: "smooth", block: "center" },
-    },
-  });
+  ensureShepherdAssets()
+    .then(() => {
+      if (typeof Shepherd === "undefined") return;
+      startTour();
+    })
+    .catch((error) => {
+      console.warn("Shepherd assets unavailable", error);
+    });
 
-  tour.addStep({
-    id: "threat-index",
-    text: "The Global Threat Index provides an at-a-glance score of narrative risk versus industry benchmarks.",
-    attachTo: {
-      element: document.querySelector(".card[data-tour='threat-index']") || ".card",
-      on: "bottom",
-    },
-    buttons: [
-      {
-        text: "Next",
-        action: tour.next,
+  function startTour() {
+    const tour = new Shepherd.Tour({
+      useModalOverlay: true,
+      defaultStepOptions: {
+        cancelIcon: { enabled: true },
+        classes: "shepherd-theme-arrows",
+        scrollTo: { behavior: "smooth", block: "center" },
       },
-    ],
-  });
+    });
 
-  tour.addStep({
-    id: "heatmap",
-    text: "Use the narrative heatmap and 3D globe to monitor regional activity in real time.",
-    attachTo: {
-      element: ".card[data-tour='heatmap']",
-      on: "top",
-    },
-    buttons: [
-      {
-        text: "Back",
-        action: tour.back,
+    tour.addStep({
+      id: "threat-index",
+      text: "The Global Threat Index provides an at-a-glance score of narrative risk versus industry benchmarks.",
+      attachTo: {
+        element: document.querySelector(".card[data-tour='threat-index']") || ".card",
+        on: "bottom",
       },
-      {
-        text: "Next",
-        action: tour.next,
-      },
-    ],
-  });
+      buttons: [
+        {
+          text: "Next",
+          action: tour.next,
+        },
+      ],
+    });
 
-  tour.addStep({
-    id: "activity",
-    text: "Review the activity feed for explainable events, sandbox outcomes, and HITL escalations.",
-    attachTo: {
-      element: ".card[data-tour='activity']",
-      on: "left",
-    },
-    buttons: [
-      {
-        text: "Back",
-        action: tour.back,
+    tour.addStep({
+      id: "heatmap",
+      text: "Use the narrative heatmap and 3D globe to monitor regional activity in real time.",
+      attachTo: {
+        element: ".card[data-tour='heatmap']",
+        on: "top",
       },
-      {
-        text: "Finish",
-        action: tour.complete,
-      },
-    ],
-  });
+      buttons: [
+        {
+          text: "Back",
+          action: tour.back,
+        },
+        {
+          text: "Next",
+          action: tour.next,
+        },
+      ],
+    });
 
-  const tourTrigger = document.querySelector("[data-tour-trigger]");
-  if (tourTrigger) {
-    tourTrigger.addEventListener("click", () => tour.start());
+    tour.addStep({
+      id: "activity",
+      text: "Review the activity feed for explainable events, sandbox outcomes, and HITL escalations.",
+      attachTo: {
+        element: ".card[data-tour='activity']",
+        on: "left",
+      },
+      buttons: [
+        {
+          text: "Back",
+          action: tour.back,
+        },
+        {
+          text: "Finish",
+          action: tour.complete,
+        },
+      ],
+    });
+
+    const tourTrigger = document.querySelector("[data-tour-trigger]");
+    if (tourTrigger) {
+      tourTrigger.addEventListener("click", () => tour.start());
+    }
   }
+}
+
+function ensureShepherdAssets() {
+  if (typeof Shepherd !== "undefined") {
+    return Promise.resolve();
+  }
+  if (shepherdLoaderPromise) {
+    return shepherdLoaderPromise;
+  }
+  shepherdLoaderPromise = Promise.all([loadStylesheetOnce(SHEPHERD_CSS_SRC), loadScriptOnce(SHEPHERD_JS_SRC)]).catch((error) => {
+    shepherdLoaderPromise = null;
+    throw error;
+  });
+  return shepherdLoaderPromise;
+}
+
+const loadedScripts = new Map();
+function loadScriptOnce(src) {
+  if (loadedScripts.has(src)) {
+    return loadedScripts.get(src);
+  }
+  const promise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load ${src}`));
+    document.head.appendChild(script);
+  });
+  loadedScripts.set(src, promise);
+  return promise;
+}
+
+const loadedStyles = new Map();
+function loadStylesheetOnce(href) {
+  if (loadedStyles.has(href)) {
+    return loadedStyles.get(href);
+  }
+  const promise = new Promise((resolve, reject) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    link.onload = () => resolve();
+    link.onerror = () => reject(new Error(`Failed to load ${href}`));
+    document.head.appendChild(link);
+  });
+  loadedStyles.set(href, promise);
+  return promise;
 }

@@ -1,6 +1,23 @@
+const BODY_DATA = document.body?.dataset || {};
+const DATA_NARRATIVE_ID = BODY_DATA.narrativeId || "nar-global-ops";
+const DATA_BRAND_ID = BODY_DATA.brandId || "brand-genaro";
+const THREE_SRC = "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js";
+const SHOULD_REDUCE_MOTION = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches || false;
+const ERROR_CONTAINER_MAP = {
+  heatmap: ["dashboard-heatmap"],
+  timeline: ["narrative-timeline"],
+  platform: ["narrative-platform"],
+  sentiment: ["narrative-sentiment"],
+  geo: ["narrative-geo"],
+  riskGraph: ["risk-network"],
+  coordination: ["risk-coordination"],
+  sandbox: ["sandbox-network", "sandbox-audience"],
+  executive: ["exec-distribution", "exec-threatmap", "exec-categories", "exec-timeline", "exec-impact", "exec-forecast"],
+  advertising: ["ads-spend-performance", "ads-channel", "ads-correlation", "ads-budget"],
+};
 
 document.addEventListener("DOMContentLoaded", () => {
-  drawNarrativeGlobe();
+  initNarrativeGlobe();
   const tippyInstances = [];
 
   const registerTooltip = (element, html) => {
@@ -16,17 +33,126 @@ document.addEventListener("DOMContentLoaded", () => {
     tippyInstances.push(instance);
   };
 
-  drawDashboardHeatmap(registerTooltip);
-  drawNarrativeTimeline(registerTooltip);
-  drawNarrativePlatform(registerTooltip);
-  drawNarrativeSentiment(registerTooltip);
-  drawNarrativeGeo(registerTooltip);
-  drawRiskNetwork(registerTooltip);
-  drawRiskCoordination(registerTooltip);
-  drawSandboxNetwork(registerTooltip);
-  drawExecutiveCharts(registerTooltip);
-  drawAdvertisingCharts(registerTooltip);
+  hydrateCharts(registerTooltip);
 });
+
+function initNarrativeGlobe() {
+  const container = document.getElementById("dashboard-globe");
+  if (!container) return;
+
+  const renderGlobe = () => drawNarrativeGlobe();
+  if (typeof THREE !== "undefined") {
+    renderGlobe();
+    return;
+  }
+
+  loadExternalScript(THREE_SRC).then(renderGlobe).catch(renderGlobe);
+}
+
+async function hydrateCharts(registerTooltip) {
+  const api = window.MockApiClient;
+  const hasElement = (id) => !!document.getElementById(id);
+  const needs = {
+    heatmap: hasElement("dashboard-heatmap"),
+    timeline: hasElement("narrative-timeline"),
+    platform: hasElement("narrative-platform"),
+    sentiment: hasElement("narrative-sentiment"),
+    geo: hasElement("narrative-geo"),
+    riskGraph: hasElement("risk-network"),
+    coordination: hasElement("risk-coordination"),
+    sandbox: hasElement("sandbox-network") || hasElement("sandbox-audience"),
+    executive: ["exec-distribution", "exec-threatmap", "exec-categories", "exec-timeline", "exec-impact", "exec-forecast"].some(hasElement),
+    advertising: ["ads-spend-performance", "ads-channel", "ads-correlation", "ads-budget"].some(hasElement),
+    trends: document.querySelectorAll("[data-sparkline]").length > 0,
+  };
+
+  if (!Object.values(needs).some(Boolean)) {
+    return;
+  }
+
+  if (!api) {
+    console.warn("Mock API client missing — charts skipped");
+    emitErrorStates(needs, "Simulation data unavailable.");
+    return;
+  }
+
+  const dataStore = {};
+  const failures = new Set();
+  const pending = [];
+
+  const markFailure = (key, error) => {
+    failures.add(key);
+    console.error(`Failed to load ${key} dataset`, error);
+    emitErrorForKey(key, "Unable to load data.");
+  };
+
+  const enqueue = (key, promise) => {
+    pending.push(
+      promise
+        .then((resp) => {
+          dataStore[key] = resp;
+        })
+        .catch((error) => markFailure(key, error))
+    );
+  };
+
+  if (needs.heatmap) {
+    enqueue("heatmap", api.getNarrativeMetrics({ id: DATA_NARRATIVE_ID, window: "24h", breakdown: "region_category" }));
+  }
+  if (needs.timeline) {
+    enqueue("timeline", api.getNarrativeMetrics({ id: DATA_NARRATIVE_ID, window: "7d", breakdown: "origin_daily" }));
+  }
+  if (needs.platform) {
+    enqueue("platform", api.getNarrativeMetrics({ id: DATA_NARRATIVE_ID, window: "24h", breakdown: "platform" }));
+  }
+  if (needs.sentiment) {
+    enqueue("sentiment", api.getNarrativeMetrics({ id: DATA_NARRATIVE_ID, window: "24h", breakdown: "sentiment_hour" }));
+  }
+  if (needs.geo) {
+    enqueue("geo", api.getNarrativeMetrics({ id: DATA_NARRATIVE_ID, window: "24h", breakdown: "geo" }));
+  }
+  if (needs.coordination) {
+    enqueue("coordination", api.getMetricsKpis({ kpi: "coordination_index", window: "24h" }));
+  }
+  if (needs.riskGraph) {
+    enqueue("riskGraph", api.getRiskSignals({ narrativeId: DATA_NARRATIVE_ID }));
+  }
+  if (needs.sandbox) {
+    enqueue("sandbox", api.getSandboxSimulation({ narrativeId: DATA_NARRATIVE_ID }));
+  }
+  if (needs.executive) {
+    enqueue("executive", api.getExecutiveOverview({ narrativeId: DATA_NARRATIVE_ID }));
+  }
+  if (needs.advertising) {
+    enqueue("advertising", api.getAdvertisingPerformance({ entityId: DATA_BRAND_ID }));
+  }
+  if (needs.trends) {
+    enqueue("trends", api.getDashboardTrends());
+  }
+
+  await Promise.all(pending);
+
+  const drawIfReady = (key, handler) => {
+    if (!needs[key]) return;
+    if (dataStore[key]) {
+      handler(dataStore[key]);
+    } else if (!failures.has(key)) {
+      emitErrorForKey(key, "No data available.");
+    }
+  };
+
+  drawIfReady("heatmap", (resp) => drawDashboardHeatmap(registerTooltip, mapHeatmapData(resp)));
+  drawIfReady("timeline", (resp) => drawNarrativeTimeline(registerTooltip, mapOriginTimeline(resp)));
+  drawIfReady("platform", (resp) => drawNarrativePlatform(registerTooltip, mapPlatformShare(resp)));
+  drawIfReady("sentiment", (resp) => drawNarrativeSentiment(registerTooltip, mapSentimentSeries(resp)));
+  drawIfReady("geo", (resp) => drawNarrativeGeo(registerTooltip, mapGeoBreakdown(resp)));
+  drawIfReady("riskGraph", (resp) => drawRiskNetwork(registerTooltip, resp));
+  drawIfReady("coordination", (resp) => drawRiskCoordination(registerTooltip, mapCoordinationSeries(resp)));
+  drawIfReady("sandbox", (resp) => drawSandboxNetwork(registerTooltip, resp));
+  drawIfReady("executive", (resp) => drawExecutiveCharts(registerTooltip, resp));
+  drawIfReady("advertising", (resp) => drawAdvertisingCharts(registerTooltip, resp));
+  drawIfReady("trends", (resp) => renderDashboardTrends(resp));
+}
 
 function clearChart(container) {
   const el = document.getElementById(container);
@@ -131,29 +257,35 @@ function drawNarrativeGlobe() {
   let animationFrameId = null;
   let isPaused = false;
 
-  const animate = () => {
-    if (isPaused) return;
-    globe.rotation.y += 0.0009;
-    points.rotation.y += 0.0014;
-    halo.rotation.y += 0.0006;
-    renderer.render(scene, camera);
-    animationFrameId = requestAnimationFrame(animate);
-  };
-  animate();
+  const renderFrame = () => renderer.render(scene, camera);
 
-  const handleVisibilityChange = () => {
-    if (document.hidden) {
-      isPaused = true;
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
+  if (!SHOULD_REDUCE_MOTION) {
+    const animate = () => {
+      if (isPaused) return;
+      globe.rotation.y += 0.0009;
+      points.rotation.y += 0.0014;
+      halo.rotation.y += 0.0006;
+      renderFrame();
+      animationFrameId = requestAnimationFrame(animate);
+    };
+    animate();
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        isPaused = true;
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
+        }
+      } else if (isPaused) {
+        isPaused = false;
+        animate();
       }
-    } else if (isPaused) {
-      isPaused = false;
-      animate();
-    }
-  };
-  document.addEventListener("visibilitychange", handleVisibilityChange);
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+  } else {
+    renderFrame();
+  }
 
   const handleResize = () => {
     const newWidth = container.clientWidth || width;
@@ -183,26 +315,12 @@ function webglAvailable() {
   }
 }
 
-function drawDashboardHeatmap(registerTooltip) {
+function drawDashboardHeatmap(registerTooltip, data) {
   const container = clearChart("dashboard-heatmap");
-  if (!container) return;
+  if (!container || !data?.length) return;
 
-  const categories = ["Finance", "Healthcare", "Energy", "Politics", "Consumer"];
-  const regions = ["North America", "Europe", "APAC", "LATAM"];
-  const data = [];
-
-  regions.forEach((region, row) => {
-    categories.forEach((cat, col) => {
-      data.push({
-        region: region,
-        category: cat,
-        value: Math.round(Math.random() * 80 + 20),
-        row,
-        col,
-      });
-    });
-  });
-
+  const categories = [...new Set(data.map((d) => d.category))];
+  const regions = [...new Set(data.map((d) => d.region))];
   const width = container.clientWidth || 480;
   const height = container.clientHeight || 320;
   const margin = { top: 30, right: 20, bottom: 45, left: 120 };
@@ -227,7 +345,7 @@ function drawDashboardHeatmap(registerTooltip) {
 
   const colorScale = d3
     .scaleLinear()
-    .domain([0, 100])
+    .domain([0, d3.max(data, (d) => d.value) || 100])
     .range(["#38bdf8", "#ef4444"]);
 
   svg
@@ -247,14 +365,11 @@ function drawDashboardHeatmap(registerTooltip) {
       registerTooltip?.(this, `<strong>${d.region}</strong><br>${d.category}<br>Activity Index: ${d.value}`);
     });
 
-  const axisX = d3.axisBottom(xScale).tickSize(0);
-  const axisY = d3.axisLeft(yScale).tickSize(0);
-
   svg
     .append("g")
     .attr("transform", `translate(0, ${height - margin.bottom})`)
     .attr("color", "rgba(148,163,184,0.6)")
-    .call(axisX)
+    .call(d3.axisBottom(xScale).tickSize(0))
     .selectAll("text")
     .style("font-size", "12px");
 
@@ -262,33 +377,34 @@ function drawDashboardHeatmap(registerTooltip) {
     .append("g")
     .attr("transform", `translate(${margin.left}, 0)`)
     .attr("color", "rgba(148,163,184,0.6)")
-    .call(axisY)
+    .call(d3.axisLeft(yScale).tickSize(0))
     .selectAll("text")
     .style("font-size", "12px");
+
+  const topCell = data.reduce((best, cell) => (cell.value > best.value ? cell : best), data[0]);
+  setChartSummary(
+    "dashboard-heatmap",
+    `Highest activity in ${topCell.region} for ${topCell.category} with index ${topCell.value}.`
+  );
 }
 
-function drawNarrativeTimeline(registerTooltip) {
+function drawNarrativeTimeline(registerTooltip, data) {
   const container = clearChart("narrative-timeline");
-  if (!container) return;
+  if (!container || !data?.length) return;
 
   const width = container.clientWidth || 320;
   const height = container.clientHeight || 220;
   const margin = { top: 20, right: 20, bottom: 40, left: 40 };
-
-  const days = d3.range(7).map((d) => ({
-    day: `Day ${d + 1}`,
-    organic: Math.round(Math.random() * 40 + 20),
-    synthetic: Math.round(Math.random() * 50 + 40),
-  }));
+  const parsed = data.map((d) => ({ ...d, date: new Date(d.date) }));
 
   const x = d3
-    .scalePoint()
-    .domain(days.map((d) => d.day))
+    .scaleTime()
+    .domain(d3.extent(parsed, (d) => d.date))
     .range([margin.left, width - margin.right]);
 
   const y = d3
     .scaleLinear()
-    .domain([0, d3.max(days, (d) => d.synthetic) * 1.1])
+    .domain([0, d3.max(parsed, (d) => Math.max(d.synthetic, d.organic)) * 1.1])
     .nice()
     .range([height - margin.bottom, margin.top]);
 
@@ -298,64 +414,61 @@ function drawNarrativeTimeline(registerTooltip) {
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("aria-hidden", "true");
 
-  const lineOrganic = d3
-    .line()
-    .x((d) => x(d.day))
-    .y((d) => y(d.organic))
-    .curve(d3.curveMonotoneX);
+  const lineBuilder = (key, color, dashArray = null) =>
+    d3
+      .line()
+      .x((d) => x(d.date))
+      .y((d) => y(d[key]))
+      .curve(d3.curveMonotoneX);
 
-  const lineSynthetic = d3
-    .line()
-    .x((d) => x(d.day))
-    .y((d) => y(d.synthetic))
-    .curve(d3.curveMonotoneX);
+  const organicLine = lineBuilder("organic", "#60a5fa");
+  const syntheticLine = lineBuilder("synthetic", "#ef4444");
 
   svg
     .append("path")
-    .datum(days)
+    .datum(parsed)
     .attr("fill", "none")
     .attr("stroke", "#60a5fa")
     .attr("stroke-width", 2)
-    .attr("d", lineOrganic);
+    .attr("d", organicLine);
 
   svg
     .append("path")
-    .datum(days)
+    .datum(parsed)
     .attr("fill", "none")
     .attr("stroke", "#ef4444")
     .attr("stroke-width", 2)
     .attr("stroke-dasharray", "6 3")
-    .attr("d", lineSynthetic);
+    .attr("d", syntheticLine);
 
   const timelinePoints = svg
     .selectAll(".point")
-    .data(days.flatMap((d) => [
-      { ...d, type: "Organic", value: d.organic, color: "#60a5fa" },
-      { ...d, type: "Synthetic", value: d.synthetic, color: "#ef4444" },
-    ]))
+    .data(
+      parsed.flatMap((d) => [
+        { ...d, type: "Organic", value: d.organic, color: "#60a5fa" },
+        { ...d, type: "Synthetic", value: d.synthetic, color: "#ef4444" },
+      ])
+    )
     .join("circle")
-    .attr("cx", (d) => x(d.day))
+    .attr("cx", (d) => x(d.date))
     .attr("cy", (d) => y(d.value))
     .attr("r", 4)
     .attr("fill", (d) => d.color);
 
-  if (typeof registerTooltip === "function") {
-    timelinePoints.each(function (d) {
-      registerTooltip(
-        this,
-        `<strong>${d.day}</strong><br>${d.type}: ${d.value}`
-      );
-    });
-  }
+  timelinePoints.each(function (d) {
+    registerTooltip?.(
+      this,
+      `<strong>${d.date.toISOString().slice(0, 10)}</strong><br>${d.type}: ${d.value}`
+    );
+  });
 
-  const axisX = d3.axisBottom(x).tickSize(0);
-  const axisY = d3.axisLeft(y).ticks(4).tickSize(-width + margin.left + margin.right);
+  const formatDate = d3.timeFormat("%b %d");
 
   svg
     .append("g")
     .attr("transform", `translate(0, ${height - margin.bottom})`)
     .attr("color", "rgba(148,163,184,0.6)")
-    .call(axisX)
+    .call(d3.axisBottom(x).ticks(6).tickFormat(formatDate).tickSize(0))
     .selectAll("text")
     .style("font-size", "12px");
 
@@ -363,26 +476,26 @@ function drawNarrativeTimeline(registerTooltip) {
     .append("g")
     .attr("transform", `translate(${margin.left}, 0)`)
     .attr("color", "rgba(148,163,184,0.3)")
-    .call(axisY)
+    .call(d3.axisLeft(y).ticks(4).tickSize(-width + margin.left + margin.right))
     .selectAll("text")
     .style("font-size", "11px");
+
+  const latest = parsed[parsed.length - 1];
+  setChartSummary(
+    "narrative-timeline",
+    `Latest organic mentions ${latest.organic} versus synthetic ${latest.synthetic} on ${formatDate(latest.date)}.`
+  );
 }
 
-function drawNarrativePlatform(registerTooltip) {
+function drawNarrativePlatform(registerTooltip, data) {
   const container = clearChart("narrative-platform");
-  if (!container) return;
+  if (!container || !data?.length) return;
 
   const width = container.clientWidth || 220;
   const height = container.clientHeight || 220;
   const radius = Math.min(width, height) / 2 - 10;
-
-  const platforms = [
-    { label: "Twitter", value: 34, color: "#60a5fa" },
-    { label: "Facebook", value: 28, color: "#818cf8" },
-    { label: "TikTok", value: 19, color: "#c084fc" },
-    { label: "Reddit", value: 12, color: "#22d3ee" },
-    { label: "Others", value: 7, color: "#f97316" },
-  ];
+  const palette = ["#60a5fa", "#818cf8", "#c084fc", "#22d3ee", "#f97316"];
+  const colored = data.map((d, index) => ({ ...d, color: palette[index % palette.length] }));
 
   const svg = d3
     .select(container)
@@ -397,57 +510,58 @@ function drawNarrativePlatform(registerTooltip) {
 
   const slices = svg
     .selectAll("path")
-    .data(pie(platforms))
+    .data(pie(colored))
     .join("path")
     .attr("d", arc)
     .attr("fill", (d) => d.data.color)
     .attr("stroke", "rgba(15,23,42,0.9)")
     .attr("stroke-width", 2);
 
-  if (typeof registerTooltip === "function") {
-    slices.each(function (d) {
-      registerTooltip(
-        this,
-        `<strong>${d.data.label}</strong><br>${d.data.value}% share`
-      );
-    });
-  }
+  slices.each(function (d) {
+    registerTooltip?.(this, `<strong>${d.data.label}</strong><br>${d.data.value}% share`);
+  });
 
   svg
     .selectAll("text")
-    .data(pie(platforms))
+    .data(pie(colored))
     .join("text")
     .attr("transform", (d) => `translate(${arc.centroid(d)})`)
     .attr("text-anchor", "middle")
     .attr("fill", "#f8fafc")
     .attr("font-size", "11px")
     .text((d) => `${d.data.value}%`);
+
+  const sortedPlatforms = [...data].sort((a, b) => b.value - a.value);
+  if (sortedPlatforms.length) {
+    setChartSummary(
+      "narrative-platform",
+      `Top platforms: ${sortedPlatforms[0].label} ${sortedPlatforms[0].value}% and ${
+        sortedPlatforms[1]?.label ?? "others"
+      }.`
+    );
+  }
 }
 
-function drawNarrativeSentiment(registerTooltip) {
+function drawNarrativeSentiment(registerTooltip, data) {
   const container = clearChart("narrative-sentiment");
-  if (!container) return;
+  if (!container || !data?.length) return;
 
   const width = container.clientWidth || 480;
   const height = container.clientHeight || 260;
   const margin = { top: 20, right: 20, bottom: 40, left: 50 };
-
-  const points = d3.range(24).map((i) => ({
-    hour: i,
-    authentic: Math.sin(i / 3) * 20 + 30 + Math.random() * 5,
-    synthetic: Math.cos(i / 4) * 25 + 40 + Math.random() * 5,
-    overall: Math.sin(i / 5) * 15 + 35 + Math.random() * 5,
-  }));
+  const parsed = data.map((d) => ({ ...d, hour: new Date(d.hour) }));
 
   const x = d3
-    .scaleLinear()
-    .domain([0, d3.max(points, (d) => d.hour)])
+    .scaleTime()
+    .domain(d3.extent(parsed, (d) => d.hour))
     .range([margin.left, width - margin.right]);
 
-  const y = d3
-    .scaleLinear()
-    .domain([0, 100])
-    .range([height - margin.bottom, margin.top]);
+  const y = d3.scaleLinear().domain([0, 100]).range([height - margin.bottom, margin.top]);
+  const seriesDefs = [
+    { key: "overall", color: "#38bdf8", label: "Overall" },
+    { key: "authentic", color: "#10b981", label: "Authentic" },
+    { key: "synthetic", color: "#ef4444", label: "Synthetic" },
+  ];
 
   const svg = d3
     .select(container)
@@ -455,31 +569,25 @@ function drawNarrativeSentiment(registerTooltip) {
     .attr("viewBox", `0 0 ${width} ${height}`)
     .attr("aria-hidden", "true");
 
-  const lines = [
-    { key: "overall", color: "#38bdf8", label: "Overall" },
-    { key: "authentic", color: "#10b981", label: "Authentic" },
-    { key: "synthetic", color: "#ef4444", label: "Synthetic" },
-  ];
-
-  lines.forEach((lineDef) => {
+  seriesDefs.forEach((series) => {
     const line = d3
       .line()
       .x((d) => x(d.hour))
-      .y((d) => y(d[lineDef.key]))
+      .y((d) => y(d[series.key]))
       .curve(d3.curveMonotoneX);
 
     svg
       .append("path")
-      .datum(points)
+      .datum(parsed)
       .attr("fill", "none")
-      .attr("stroke", lineDef.color)
+      .attr("stroke", series.color)
       .attr("stroke-width", 2)
       .attr("d", line);
   });
 
   svg
     .selectAll(".sentiment-point")
-    .data(points)
+    .data(parsed)
     .join("circle")
     .attr("class", "sentiment-point")
     .attr("cx", (d) => x(d.hour))
@@ -490,26 +598,17 @@ function drawNarrativeSentiment(registerTooltip) {
     .each(function (d) {
       registerTooltip?.(
         this,
-        `<strong>Hour ${d.hour}</strong><br>Overall: ${d.overall.toFixed(
-          1
-        )}<br>Authentic: ${d.authentic.toFixed(
-          1
-        )}<br>Synthetic: ${d.synthetic.toFixed(1)}`
+        `<strong>${d.hour.toISOString()}</strong><br>Overall: ${d.overall.toFixed(1)}<br>Authentic: ${d.authentic.toFixed(1)}<br>Synthetic: ${d.synthetic.toFixed(1)}`
       );
     });
 
-  const axisX = d3
-    .axisBottom(x)
-    .ticks(6)
-    .tickFormat((d) => `${d}h`)
-    .tickSize(0);
-  const axisY = d3.axisLeft(y).ticks(5).tickSize(-width + margin.left + margin.right);
+  const formatHour = d3.timeFormat("%H:%M");
 
   svg
     .append("g")
     .attr("transform", `translate(0, ${height - margin.bottom})`)
     .attr("color", "rgba(148,163,184,0.6)")
-    .call(axisX)
+    .call(d3.axisBottom(x).ticks(6).tickFormat(formatHour).tickSize(0))
     .selectAll("text")
     .style("font-size", "12px");
 
@@ -517,26 +616,26 @@ function drawNarrativeSentiment(registerTooltip) {
     .append("g")
     .attr("transform", `translate(${margin.left}, 0)`)
     .attr("color", "rgba(148,163,184,0.3)")
-    .call(axisY)
+    .call(d3.axisLeft(y).ticks(5).tickSize(-width + margin.left + margin.right))
     .selectAll("text")
     .style("font-size", "11px");
+
+  const latest = parsed[parsed.length - 1];
+  setChartSummary(
+    "narrative-sentiment",
+    `Overall sentiment at ${formatHour(latest.hour)} is ${latest.overall.toFixed(
+      1
+    )}; authentic ${latest.authentic.toFixed(1)}, synthetic ${latest.synthetic.toFixed(1)}.`
+  );
 }
 
-function drawNarrativeGeo(registerTooltip) {
+function drawNarrativeGeo(registerTooltip, regions) {
   const container = clearChart("narrative-geo");
-  if (!container) return;
+  if (!container || !regions?.length) return;
 
   const width = container.clientWidth || 320;
   const height = container.clientHeight || 260;
   const margin = { top: 20, right: 20, bottom: 40, left: 120 };
-
-  const regions = [
-    { name: "USA", intensity: 78, trend: "+12%", sentiment: "+18" },
-    { name: "UK", intensity: 62, trend: "+7%", sentiment: "+9" },
-    { name: "Germany", intensity: 54, trend: "+5%", sentiment: "+6" },
-    { name: "LATAM", intensity: 47, trend: "+9%", sentiment: "-4" },
-    { name: "APAC", intensity: 39, trend: "+4%", sentiment: "-2" },
-  ];
 
   const svg = d3
     .select(container)
@@ -555,10 +654,7 @@ function drawNarrativeGeo(registerTooltip) {
     .domain([0, d3.max(regions, (d) => d.intensity) * 1.1])
     .range([margin.left, width - margin.right]);
 
-  const color = d3
-    .scaleLinear()
-    .domain([0, 80])
-    .range(["rgba(96,165,250,0.25)", "rgba(239,68,68,0.65)"]);
+  const color = d3.scaleLinear().domain([0, 80]).range(["rgba(96,165,250,0.25)", "rgba(239,68,68,0.65)"]);
 
   const bars = svg
     .selectAll("rect")
@@ -595,26 +691,18 @@ function drawNarrativeGeo(registerTooltip) {
     .attr("font-size", "12px")
     .text((d) => `${d.intensity} idx`);
 
-  if (typeof registerTooltip === "function") {
-    bars.each(function (d) {
-      registerTooltip(
-        this,
-        `<strong>${d.name}</strong><br>Intensity Index: ${d.intensity}<br>Trend: ${d.trend}<br>Sentiment shift: ${d.sentiment}`
-      );
-    });
-  }
-
-  const axisX = d3
-    .axisBottom(x)
-    .ticks(5)
-    .tickFormat((d) => `${d}`)
-    .tickSize(0);
+  bars.each(function (d) {
+    registerTooltip?.(
+      this,
+      `<strong>${d.name}</strong><br>Intensity Index: ${d.intensity}<br>Trend: ${d.trendPct}%<br>Sentiment shift: ${d.sentimentShift}`
+    );
+  });
 
   svg
     .append("g")
     .attr("transform", `translate(0, ${height - margin.bottom})`)
     .attr("color", "rgba(148,163,184,0.6)")
-    .call(axisX)
+    .call(d3.axisBottom(x).ticks(5).tickSize(0))
     .selectAll("text")
     .style("font-size", "11px");
 
@@ -625,25 +713,21 @@ function drawNarrativeGeo(registerTooltip) {
     .call(d3.axisLeft(y).tickSize(0))
     .selectAll("text")
     .remove();
+
+  const leader = regions.reduce((best, region) => (region.intensity > best.intensity ? region : best), regions[0]);
+  setChartSummary(
+    "narrative-geo",
+    `Strongest regional intensity in ${leader.name} (${leader.intensity} index).`
+  );
 }
 
-function drawRiskNetwork(registerTooltip) {
+function drawRiskNetwork(registerTooltip, graphData) {
   const container = clearChart("risk-network");
-  if (!container) return;
+  if (!container || !graphData?.nodes?.length) return;
 
   const width = container.clientWidth || 320;
   const height = container.clientHeight || 220;
-
-  const nodes = d3.range(25).map((i) => ({
-    id: i,
-    group: i < 5 ? "Commander" : "Bot",
-    critical: Math.random() > 0.8,
-  }));
-  const links = d3.range(40).map(() => ({
-    source: Math.floor(Math.random() * nodes.length),
-    target: Math.floor(Math.random() * nodes.length),
-    value: Math.random() * 2 + 0.5,
-  }));
+  const { nodes, links } = graphData;
 
   const svg = d3
     .select(container)
@@ -652,38 +736,37 @@ function drawRiskNetwork(registerTooltip) {
     .attr("aria-hidden", "true");
 
   const simulation = d3
-    .forceSimulation(nodes)
+    .forceSimulation(nodes.map((node) => ({ ...node })))
     .force(
       "link",
-      d3
-        .forceLink(links)
-        .distance(60)
-        .strength((d) => d.value * 0.2)
+      d3.forceLink(links.map((link) => ({ ...link })))
+        .id((d) => d.id)
+        .distance(80)
     )
-    .force("charge", d3.forceManyBody().strength(-120))
+    .force("charge", d3.forceManyBody().strength(-200))
     .force("center", d3.forceCenter(width / 2, height / 2));
 
   const link = svg
     .append("g")
-    .attr("stroke", "rgba(148,163,184,0.3)")
+    .attr("stroke", "rgba(148,163,184,0.25)")
     .attr("stroke-width", 1.2)
     .selectAll("line")
-    .data(links)
+    .data(simulation.force("link").links())
     .join("line");
 
   const node = svg
     .append("g")
     .selectAll("circle")
-    .data(nodes)
+    .data(simulation.nodes())
     .join("circle")
-    .attr("r", (d) => (d.group === "Commander" ? 8 : 5))
-    .attr("fill", (d) => (d.group === "Commander" ? "#ef4444" : "#60a5fa"))
+    .attr("r", (d) => (d.role === "Commander" ? 8 : 5))
+    .attr("fill", (d) => (d.role === "Commander" ? "#ef4444" : "#60a5fa"))
     .attr("stroke", "rgba(15,23,42,0.8)")
     .attr("stroke-width", 1.5)
     .each(function (d) {
       registerTooltip?.(
         this,
-        `<strong>Node ${d.id}</strong><br>Type: ${d.group}<br>${d.critical ? "Critical" : "Peripheral"}`
+        `<strong>${d.id}</strong><br>Role: ${d.role}<br>${d.critical ? "Critical" : "Peripheral"}`
       );
     })
     .call(
@@ -705,7 +788,7 @@ function drawRiskNetwork(registerTooltip) {
         })
     );
 
-  simulation.on("tick", () => {
+  const updatePositions = () => {
     link
       .attr("x1", (d) => d.source.x)
       .attr("y1", (d) => d.source.y)
@@ -713,29 +796,46 @@ function drawRiskNetwork(registerTooltip) {
       .attr("y2", (d) => d.target.y);
 
     node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-  });
+  };
+
+  if (SHOULD_REDUCE_MOTION) {
+    for (let i = 0; i < 40; i++) {
+      simulation.tick();
+    }
+    updatePositions();
+    simulation.stop();
+  } else {
+    simulation.on("tick", updatePositions);
+  }
 }
 
-function drawRiskCoordination(registerTooltip) {
+function drawRiskCoordination(registerTooltip, series) {
   const container = clearChart("risk-coordination");
-  if (!container) return;
+  if (!container || !series?.length) return;
 
   const width = container.clientWidth || 320;
   const height = container.clientHeight || 220;
   const margin = { top: 25, right: 20, bottom: 40, left: 45 };
 
-  const hours = d3.range(24).map((h) => ({
-    hour: h,
-    value: Math.round(Math.random() * 80 + 20),
-  }));
+  const x = d3
+    .scaleBand()
+    .domain(series.map((d) => d.hour))
+    .range([margin.left, width - margin.right])
+    .padding(0.2);
+  const y = d3
+    .scaleLinear()
+    .domain([0, d3.max(series, (d) => d.value) || 100])
+    .range([height - margin.bottom, margin.top]);
 
-  const x = d3.scaleBand().domain(hours.map((d) => d.hour)).range([margin.left, width - margin.right]).padding(0.2);
-  const y = d3.scaleLinear().domain([0, 100]).range([height - margin.bottom, margin.top]);
+  const svg = d3
+    .select(container)
+    .append("svg")
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("aria-hidden", "true");
 
-  const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("aria-hidden", "true");
-
-  svg.selectAll("rect")
-    .data(hours)
+  svg
+    .selectAll("rect")
+    .data(series)
     .join("rect")
     .attr("x", (d) => x(d.hour))
     .attr("y", (d) => y(d.value))
@@ -747,30 +847,33 @@ function drawRiskCoordination(registerTooltip) {
       registerTooltip?.(this, `<strong>${d.hour}:00</strong><br>Coordination index: ${d.value}`);
     });
 
-  const axisX = d3.axisBottom(x).tickValues([0, 6, 12, 18, 23]).tickFormat((d) => `${d}h`).tickSize(0);
-  const axisY = d3.axisLeft(y).ticks(4).tickSize(-width + margin.left + margin.right);
+  svg
+    .append("g")
+    .attr("transform", `translate(0, ${height - margin.bottom})`)
+    .attr("color", "rgba(148,163,184,0.6)")
+    .call(d3.axisBottom(x).tickValues([0, 6, 12, 18, 23]).tickFormat((d) => `${d}h`).tickSize(0))
+    .selectAll("text")
+    .style("font-size", "11px");
 
-  svg.append("g").attr("transform", `translate(0, ${height - margin.bottom})`).attr("color", "rgba(148,163,184,0.6)").call(axisX).selectAll("text").style("font-size", "11px");
-  svg.append("g").attr("transform", `translate(${margin.left}, 0)`).attr("color", "rgba(148,163,184,0.3)").call(axisY).selectAll("text").style("font-size", "11px");
+  svg
+    .append("g")
+    .attr("transform", `translate(${margin.left}, 0)`)
+    .attr("color", "rgba(148,163,184,0.3)")
+    .call(d3.axisLeft(y).ticks(4).tickSize(-width + margin.left + margin.right))
+    .selectAll("text")
+    .style("font-size", "11px");
+
+  const peak = series.reduce((best, row) => (row.value > best.value ? row : best), series[0]);
+  setChartSummary("risk-coordination", `Peak coordination index ${peak.value} at hour ${peak.hour}.`);
 }
 
-function drawSandboxNetwork(registerTooltip) {
+function drawSandboxNetwork(registerTooltip, sandboxData) {
   const container = clearChart("sandbox-network");
-  if (!container) return;
+  if (!container || !sandboxData?.network?.nodes?.length) return;
 
   const width = container.clientWidth || 520;
   const height = container.clientHeight || 360;
-
-  const nodes = d3.range(30).map((i) => ({
-    id: i,
-    camp: i % 3 === 0 ? "Our" : i % 3 === 1 ? "Opposition" : "Neutral",
-    size: Math.random() * 6 + 4,
-  }));
-  const links = d3.range(60).map(() => ({
-    source: Math.floor(Math.random() * nodes.length),
-    target: Math.floor(Math.random() * nodes.length),
-    strength: Math.random(),
-  }));
+  const { nodes, links } = sandboxData.network;
 
   const color = d3
     .scaleOrdinal()
@@ -784,10 +887,13 @@ function drawSandboxNetwork(registerTooltip) {
     .attr("aria-hidden", "true");
 
   const simulation = d3
-    .forceSimulation(nodes)
+    .forceSimulation(nodes.map((node) => ({ ...node })))
     .force(
       "link",
-      d3.forceLink(links).distance(80).strength((d) => d.strength * 0.6)
+      d3.forceLink(links.map((link) => ({ ...link })))
+        .id((d) => d.id)
+        .distance(80)
+        .strength((d) => (d.strength || 0.5) * 0.6)
     )
     .force("charge", d3.forceManyBody().strength(-180))
     .force("center", d3.forceCenter(width / 2, height / 2));
@@ -797,26 +903,26 @@ function drawSandboxNetwork(registerTooltip) {
     .attr("stroke", "rgba(148,163,184,0.25)")
     .attr("stroke-width", 1)
     .selectAll("line")
-    .data(links)
+    .data(simulation.force("link").links())
     .join("line");
 
   const node = svg
     .append("g")
     .selectAll("circle")
-    .data(nodes)
+    .data(simulation.nodes())
     .join("circle")
-    .attr("r", (d) => d.size)
+    .attr("r", (d) => d.influence || 6)
     .attr("fill", (d) => color(d.camp))
     .attr("stroke", "rgba(15,23,42,0.8)")
     .attr("stroke-width", 1.4)
     .each(function (d) {
       registerTooltip?.(
         this,
-        `<strong>Node ${d.id}</strong><br>Segment: ${d.camp}<br>Influence: ${d.size.toFixed(1)}`
+        `<strong>${d.id}</strong><br>Segment: ${d.camp}<br>Influence: ${d.influence?.toFixed(1) ?? "n/a"}`
       );
     });
 
-  simulation.on("tick", () => {
+  const updateSandboxPositions = () => {
     link
       .attr("x1", (d) => d.source.x)
       .attr("y1", (d) => d.source.y)
@@ -824,29 +930,32 @@ function drawSandboxNetwork(registerTooltip) {
       .attr("y2", (d) => d.target.y);
 
     node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
-  });
+  };
+
+  if (SHOULD_REDUCE_MOTION) {
+    for (let i = 0; i < 40; i++) {
+      simulation.tick();
+    }
+    updateSandboxPositions();
+    simulation.stop();
+  } else {
+    simulation.on("tick", updateSandboxPositions);
+  }
 
   const audienceContainer = clearChart("sandbox-audience");
-  if (audienceContainer) {
+  if (audienceContainer && sandboxData.segments?.length) {
     const width = audienceContainer.clientWidth || 280;
     const height = audienceContainer.clientHeight || 220;
     const margin = { top: 20, right: 20, bottom: 30, left: 60 };
 
-    const segments = [
-      { segment: "Analysts", engagement: 82, sentiment: 0.34 },
-      { segment: "Investors", engagement: 68, sentiment: 0.48 },
-      { segment: "Advocates", engagement: 91, sentiment: 0.62 },
-      { segment: "Skeptics", engagement: 47, sentiment: -0.21 },
-      { segment: "Regulators", engagement: 55, sentiment: 0.12 },
-    ];
-
+    const segments = sandboxData.segments;
     const y = d3
       .scaleBand()
       .domain(segments.map((d) => d.segment))
       .range([margin.top, height - margin.bottom])
       .padding(0.25);
     const x = d3.scaleLinear().domain([0, 100]).range([margin.left, width - margin.right]);
-    const color = d3.scaleSequential().domain([-0.3, 0.7]).interpolator(d3.interpolateRdYlGn);
+    const colorScale = d3.scaleSequential().domain([-0.3, 0.7]).interpolator(d3.interpolateRdYlGn);
 
     const svg = d3
       .select(audienceContainer)
@@ -863,7 +972,7 @@ function drawSandboxNetwork(registerTooltip) {
       .attr("width", (d) => Math.max(4, x(d.engagement) - margin.left))
       .attr("height", y.bandwidth())
       .attr("rx", 8)
-      .attr("fill", (d) => color(d.sentiment))
+      .attr("fill", (d) => colorScale(d.sentiment))
       .each(function (d) {
         registerTooltip?.(
           this,
@@ -893,45 +1002,83 @@ function drawSandboxNetwork(registerTooltip) {
       .attr("font-size", "12px")
       .text((d) => d.segment);
 
-    const axisX = d3
-      .axisBottom(x)
-      .tickValues([0, 25, 50, 75, 100])
-      .tickFormat((d) => `${d}%`)
-      .tickSize(0);
-
     svg
       .append("g")
       .attr("transform", `translate(0, ${height - margin.bottom})`)
       .attr("color", "rgba(148,163,184,0.6)")
-      .call(axisX)
+      .call(d3.axisBottom(x).tickValues([0, 25, 50, 75, 100]).tickFormat((d) => `${d}%`).tickSize(0))
       .selectAll("text")
       .style("font-size", "11px");
   }
 }
 
-function drawExecutiveCharts(registerTooltip) {
+function drawExecutiveCharts(registerTooltip, data) {
+  if (!data) return;
+  const { executiveDistribution, threatRegions, categoryBreakdown, incidents, impactScores, forecastBands } = data;
+
+  const distributionContainer = clearChart("exec-distribution");
+  if (distributionContainer && executiveDistribution?.length) {
+    const width = distributionContainer.clientWidth || 320;
+    const height = distributionContainer.clientHeight || 200;
+    const radius = Math.min(width, height) / 2 - 12;
+
+    const svg = d3
+      .select(distributionContainer)
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("aria-hidden", "true")
+      .append("g")
+      .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+    const pie = d3.pie().value((d) => d.recipients);
+    const arc = d3.arc().innerRadius(radius * 0.45).outerRadius(radius);
+
+    svg
+      .selectAll("path")
+      .data(pie(executiveDistribution))
+      .join("path")
+      .attr("d", arc)
+      .attr("fill", (d, i) => d.data.color || ["#3b82f6", "#22d3ee", "#f97316", "#a855f7", "#10b981", "#ef4444"][i % 6])
+      .attr("stroke", "rgba(15,23,42,0.85)")
+      .attr("stroke-width", 1.2)
+      .each(function (d) {
+        registerTooltip?.(
+          this,
+          `<strong>${d.data.role}</strong><br>Recipients: ${d.data.recipients}`
+        );
+      });
+
+    svg
+      .selectAll("text")
+      .data(pie(executiveDistribution))
+      .join("text")
+      .attr("transform", (d) => `translate(${arc.centroid(d)})`)
+      .attr("text-anchor", "middle")
+      .attr("fill", "#f1f5f9")
+      .attr("font-size", "11px")
+      .text((d) => d.data.recipients);
+
+    const distributionLeader = executiveDistribution.reduce((best, entry) =>
+      entry.recipients > best.recipients ? entry : best
+    );
+    setChartSummary(
+      "exec-distribution",
+      `${distributionLeader.role} received the most briefings (${distributionLeader.recipients}).`
+    );
+  }
+
   const threatContainer = clearChart("exec-threatmap");
-  if (threatContainer) {
+  if (threatContainer && threatRegions?.length) {
     const width = threatContainer.clientWidth || 320;
     const height = threatContainer.clientHeight || 220;
     const margin = { top: 20, right: 20, bottom: 40, left: 50 };
-    const regions = [
-      { region: "USA", score: 82 },
-      { region: "UK", score: 68 },
-      { region: "Germany", score: 55 },
-      { region: "Brazil", score: 47 },
-      { region: "Singapore", score: 42 },
-    ];
 
     const x = d3
       .scaleBand()
-      .domain(regions.map((d) => d.region))
+      .domain(threatRegions.map((d) => d.region))
       .range([margin.left, width - margin.right])
-      .padding(0.2);
-    const y = d3
-      .scaleLinear()
-      .domain([0, d3.max(regions, (d) => d.score) * 1.1])
-      .range([height - margin.bottom, margin.top]);
+      .padding(0.35);
+    const y = d3.scaleLinear().domain([0, d3.max(threatRegions, (d) => d.score)]).range([height - margin.bottom, margin.top]);
 
     const svg = d3
       .select(threatContainer)
@@ -941,119 +1088,46 @@ function drawExecutiveCharts(registerTooltip) {
 
     svg
       .selectAll("rect")
-      .data(regions)
+      .data(threatRegions)
       .join("rect")
       .attr("x", (d) => x(d.region))
       .attr("y", (d) => y(d.score))
       .attr("width", x.bandwidth())
       .attr("height", (d) => y(0) - y(d.score))
-      .attr("rx", 8)
-      .attr("fill", (d) => d3.interpolateRdYlBu(1 - d.score / 100))
+      .attr("rx", 10)
+      .attr("fill", (d) => d.color || "#3b82f6")
       .each(function (d) {
         registerTooltip?.(this, `<strong>${d.region}</strong><br>Threat score: ${d.score}`);
       });
 
-    const axisX = d3.axisBottom(x).tickSize(0);
-    const axisY = d3.axisLeft(y).ticks(4).tickSize(-width + margin.left + margin.right);
-
-    svg.append("g").attr("transform", `translate(0, ${height - margin.bottom})`).attr("color", "rgba(148,163,184,0.6)").call(axisX).selectAll("text").style("font-size", "12px");
-    svg.append("g").attr("transform", `translate(${margin.left}, 0)`).attr("color", "rgba(148,163,184,0.3)").call(axisY).selectAll("text").style("font-size", "11px");
-  }
-
-  const distributionContainer = clearChart("exec-distribution");
-  if (distributionContainer) {
-    const width = distributionContainer.clientWidth || 320;
-    const height = distributionContainer.clientHeight || 200;
-    const gridSpacing = 40;
-
-    const hubs = [
-      { region: "North America", recipients: 6, share: 0.36, coords: [0.25, 0.35] },
-      { region: "Europe", recipients: 4, share: 0.24, coords: [0.55, 0.30] },
-      { region: "APAC", recipients: 3, share: 0.18, coords: [0.78, 0.42] },
-      { region: "LATAM", recipients: 2, share: 0.12, coords: [0.38, 0.65] },
-      { region: "Middle East & Africa", recipients: 2, share: 0.10, coords: [0.62, 0.58] },
-    ];
-
-    const maxRecipients = d3.max(hubs, (d) => d.recipients) || 1;
-    const color = d3
-      .scaleSequential()
-      .domain([0, maxRecipients])
-      .interpolator(d3.interpolatePuBuGn);
-    const radius = d3.scaleSqrt().domain([0, maxRecipients]).range([8, 26]);
-
-    const svg = d3
-      .select(distributionContainer)
-      .append("svg")
-      .attr("viewBox", `0 0 ${width} ${height}`)
-      .attr("aria-hidden", "true");
-
-    const grid = svg.append("g").attr("stroke", "rgba(148,163,184,0.15)").attr("stroke-width", 1);
-    for (let x = gridSpacing; x < width; x += gridSpacing) {
-      grid.append("line").attr("x1", x).attr("y1", 0).attr("x2", x).attr("y2", height);
-    }
-    for (let y = gridSpacing; y < height; y += gridSpacing) {
-      grid.append("line").attr("x1", 0).attr("y1", y).attr("x2", width).attr("y2", y);
-    }
-
-    const linkGroup = svg.append("g").attr("stroke", "rgba(96,165,250,0.5)").attr("stroke-width", 1.5).attr("stroke-dasharray", "4 4");
-    linkGroup
-      .selectAll("path")
-      .data(hubs)
-      .join("path")
-      .attr("d", (d) => {
-        const [cx, cy] = [width / 2, height / 2];
-        const [tx, ty] = [d.coords[0] * width, d.coords[1] * height];
-        return `M${cx},${cy} Q${(cx + tx) / 2},${(cy + ty) / 2 - 40} ${tx},${ty}`;
-      })
-      .attr("fill", "none");
-
-    const nodes = svg.append("g");
-    nodes
-      .selectAll("circle")
-      .data(hubs)
-      .join("circle")
-      .attr("cx", (d) => d.coords[0] * width)
-      .attr("cy", (d) => d.coords[1] * height)
-      .attr("r", (d) => radius(d.recipients))
-      .attr("fill", (d) => color(d.recipients))
-      .attr("stroke", "rgba(15,23,42,0.85)")
-      .attr("stroke-width", 1.5)
-      .each(function (d) {
-        registerTooltip?.(
-          this,
-          `<strong>${d.region}</strong><br>Recipients: ${d.recipients}<br>Share: ${(d.share * 100).toFixed(0)}%`
-        );
-      });
-
-    nodes
+    svg
+      .append("g")
+      .attr("transform", `translate(0, ${height - margin.bottom})`)
+      .attr("color", "rgba(148,163,184,0.6)")
+      .call(d3.axisBottom(x).tickSize(0))
       .selectAll("text")
-      .data(hubs)
-      .join("text")
-      .attr("x", (d) => d.coords[0] * width)
-      .attr("y", (d) => d.coords[1] * height + radius(d.recipients) + 14)
-      .attr("text-anchor", "middle")
-      .attr("fill", "rgba(148,163,184,0.9)")
-      .attr("font-size", "12px")
-      .attr("font-weight", 500)
-      .text((d) => `${d.region} · ${(d.share * 100).toFixed(0)}%`);
+      .style("font-size", "11px");
+
+    svg
+      .append("g")
+      .attr("transform", `translate(${margin.left}, 0)`)
+      .attr("color", "rgba(148,163,184,0.3)")
+      .call(d3.axisLeft(y).ticks(4).tickSize(-width + margin.left + margin.right))
+      .selectAll("text")
+      .style("font-size", "11px");
+
+    const criticalRegion = threatRegions.reduce((best, region) => (region.score > best.score ? region : best), threatRegions[0]);
+    setChartSummary("exec-threatmap", `${criticalRegion.region} has the highest threat score (${criticalRegion.score}).`);
   }
 
-  const categoriesContainer = clearChart("exec-categories");
-  if (categoriesContainer) {
-    const width = categoriesContainer.clientWidth || 300;
-    const height = categoriesContainer.clientHeight || 220;
+  const categoryContainer = clearChart("exec-categories");
+  if (categoryContainer && categoryBreakdown?.length) {
+    const width = categoryContainer.clientWidth || 320;
+    const height = categoryContainer.clientHeight || 220;
     const radius = Math.min(width, height) / 2 - 12;
 
-    const segments = [
-      { label: "Coordinated Campaigns", value: 34, color: "#60a5fa" },
-      { label: "Bot Networks", value: 28, color: "#f97316" },
-      { label: "Deepfakes", value: 19, color: "#ef4444" },
-      { label: "Organic Threats", value: 12, color: "#10b981" },
-      { label: "Unknown", value: 7, color: "#a855f7" },
-    ];
-
     const svg = d3
-      .select(categoriesContainer)
+      .select(categoryContainer)
       .append("svg")
       .attr("viewBox", `0 0 ${width} ${height}`)
       .attr("aria-hidden", "true")
@@ -1061,39 +1135,39 @@ function drawExecutiveCharts(registerTooltip) {
       .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
     const pie = d3.pie().value((d) => d.value);
-    const arc = d3.arc().innerRadius(radius * 0.55).outerRadius(radius);
-
-    svg
+    const arc = d3.arc().innerRadius(radius * 0.45).outerRadius(radius);
+    const fallbackColors = ["#ef4444", "#f97316", "#6366f1", "#22d3ee", "#94a3b8", "#10b981"];
+    const slices = svg
       .selectAll("path")
-      .data(pie(segments))
+      .data(pie(categoryBreakdown))
       .join("path")
       .attr("d", arc)
-      .attr("fill", (d) => d.data.color)
+      .attr("fill", (d, i) => d.data.color || fallbackColors[i % fallbackColors.length])
       .attr("stroke", "rgba(15,23,42,0.85)")
-      .attr("stroke-width", 1.5)
-      .each(function (d) {
-        registerTooltip?.(this, `<strong>${d.data.label}</strong><br>${d.data.value}% of threats`);
-      });
+      .attr("stroke-width", 1.5);
+
+    slices.each(function (d) {
+      registerTooltip?.(this, `<strong>${d.data.label}</strong><br>${d.data.value}% of threats`);
+    });
+
+    const leadCategory = categoryBreakdown.reduce((best, cat) => (cat.value > best.value ? cat : best), categoryBreakdown[0]);
+    setChartSummary("exec-categories", `${leadCategory.label} accounts for ${leadCategory.value}% of tracked threats.`);
   }
 
   const timelineContainer = clearChart("exec-timeline");
-  if (timelineContainer) {
+  if (timelineContainer && incidents?.length) {
     const width = timelineContainer.clientWidth || 320;
     const height = timelineContainer.clientHeight || 220;
     const margin = { top: 20, right: 20, bottom: 40, left: 50 };
 
-    const incidents = [
-      { day: 2, impact: 40, label: "Bot surge" },
-      { day: 5, impact: 65, label: "Deepfake attempt" },
-      { day: 9, impact: 33, label: "Media rumor" },
-      { day: 12, impact: 72, label: "Campaign escalation" },
-      { day: 16, impact: 55, label: "Investor panic" },
-    ];
+    const x = d3.scaleLinear().domain([0, d3.max(incidents, (d) => d.day)]).range([margin.left, width - margin.right]);
+    const y = d3.scaleLinear().domain([0, d3.max(incidents, (d) => d.impact)]).range([height - margin.bottom, margin.top]);
 
-    const x = d3.scaleLinear().domain([0, 21]).range([margin.left, width - margin.right]);
-    const y = d3.scaleLinear().domain([0, 80]).range([height - margin.bottom, margin.top]);
-
-    const svg = d3.select(timelineContainer).append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("aria-hidden", "true");
+    const svg = d3
+      .select(timelineContainer)
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("aria-hidden", "true");
 
     const line = d3
       .line()
@@ -1121,33 +1195,35 @@ function drawExecutiveCharts(registerTooltip) {
         registerTooltip?.(this, `<strong>Day ${d.day}</strong><br>${d.label}<br>Impact score: ${d.impact}`);
       });
 
-    const axisX = d3.axisBottom(x).ticks(6).tickFormat((d) => `Day ${d}`);
-    const axisY = d3.axisLeft(y).ticks(4);
-
-    svg.append("g").attr("transform", `translate(0, ${height - margin.bottom})`).attr("color", "rgba(148,163,184,0.6)").call(axisX).selectAll("text").style("font-size", "11px");
-    svg.append("g").attr("transform", `translate(${margin.left}, 0)`).attr("color", "rgba(148,163,184,0.3)").call(axisY).selectAll("text").style("font-size", "11px");
+    const largestIncident = incidents.reduce((best, entry) => (entry.impact > best.impact ? entry : best), incidents[0]);
+    setChartSummary(
+      "exec-timeline",
+      `${largestIncident.label} on day ${largestIncident.day} recorded highest impact (${largestIncident.impact}).`
+    );
   }
 
   const impactContainer = clearChart("exec-impact");
-  if (impactContainer) {
+  if (impactContainer && impactScores?.length) {
     const width = impactContainer.clientWidth || 320;
     const height = impactContainer.clientHeight || 220;
     const margin = { top: 25, right: 20, bottom: 40, left: 55 };
 
-    const metrics = [
-      { label: "Brand Sentiment", value: 82, color: "#60a5fa" },
-      { label: "Financial ROI", value: 68, color: "#22c55e" },
-      { label: "Stakeholder Confidence", value: 74, color: "#f97316" },
-    ];
-
-    const x = d3.scaleBand().domain(metrics.map((d) => d.label)).range([margin.left, width - margin.right]).padding(0.35);
+    const x = d3
+      .scaleBand()
+      .domain(impactScores.map((d) => d.label))
+      .range([margin.left, width - margin.right])
+      .padding(0.35);
     const y = d3.scaleLinear().domain([0, 100]).range([height - margin.bottom, margin.top]);
 
-    const svg = d3.select(impactContainer).append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("aria-hidden", "true");
+    const svg = d3
+      .select(impactContainer)
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("aria-hidden", "true");
 
     svg
       .selectAll("rect")
-      .data(metrics)
+      .data(impactScores)
       .join("rect")
       .attr("x", (d) => x(d.label))
       .attr("y", (d) => y(d.value))
@@ -1161,31 +1237,46 @@ function drawExecutiveCharts(registerTooltip) {
 
     const axisX = d3.axisBottom(x).tickSize(0);
     const axisY = d3.axisLeft(y).ticks(4).tickSize(-width + margin.left + margin.right);
+    svg
+      .append("g")
+      .attr("transform", `translate(0, ${height - margin.bottom})`)
+      .attr("color", "rgba(148,163,184,0.6)")
+      .call(axisX)
+      .selectAll("text")
+      .style("font-size", "11px");
+    svg
+      .append("g")
+      .attr("transform", `translate(${margin.left}, 0)`)
+      .attr("color", "rgba(148,163,184,0.3)")
+      .call(axisY)
+      .selectAll("text")
+      .style("font-size", "11px");
 
-    svg.append("g").attr("transform", `translate(0, ${height - margin.bottom})`).attr("color", "rgba(148,163,184,0.6)").call(axisX).selectAll("text").style("font-size", "11px");
-    svg.append("g").attr("transform", `translate(${margin.left}, 0)`).attr("color", "rgba(148,163,184,0.3)").call(axisY).selectAll("text").style("font-size", "11px");
+    const topImpact = impactScores.reduce((best, metric) => (metric.value > best.value ? metric : best), impactScores[0]);
+    setChartSummary("exec-impact", `${topImpact.label} leads impact measures at ${topImpact.value}.`);
   }
 
   const forecastContainer = clearChart("exec-forecast");
-  if (forecastContainer) {
+  if (forecastContainer && forecastBands?.length) {
     const width = forecastContainer.clientWidth || 320;
     const height = forecastContainer.clientHeight || 220;
     const margin = { top: 25, right: 20, bottom: 35, left: 55 };
 
-    const projections = [
-      { horizon: "30d", risk: 55, lower: 45, upper: 64 },
-      { horizon: "60d", risk: 60, lower: 48, upper: 72 },
-      { horizon: "90d", risk: 68, lower: 54, upper: 81 },
-    ];
-
-    const x = d3.scalePoint().domain(projections.map((d) => d.horizon)).range([margin.left, width - margin.right]);
+    const x = d3
+      .scalePoint()
+      .domain(forecastBands.map((d) => d.horizon))
+      .range([margin.left, width - margin.right]);
     const y = d3.scaleLinear().domain([0, 100]).range([height - margin.bottom, margin.top]);
 
-    const svg = d3.select(forecastContainer).append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("aria-hidden", "true");
+    const svg = d3
+      .select(forecastContainer)
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("aria-hidden", "true");
 
     svg
       .append("path")
-      .datum(projections)
+      .datum(forecastBands)
       .attr("fill", "rgba(96,165,250,0.18)")
       .attr("stroke", "none")
       .attr(
@@ -1199,7 +1290,7 @@ function drawExecutiveCharts(registerTooltip) {
 
     svg
       .append("path")
-      .datum(projections)
+      .datum(forecastBands)
       .attr("fill", "none")
       .attr("stroke", "#60a5fa")
       .attr("stroke-width", 2)
@@ -1214,53 +1305,62 @@ function drawExecutiveCharts(registerTooltip) {
 
     svg
       .selectAll("circle")
-      .data(projections)
+      .data(forecastBands)
       .join("circle")
       .attr("cx", (d) => x(d.horizon))
       .attr("cy", (d) => y(d.risk))
       .attr("r", 5)
       .attr("fill", "#60a5fa")
       .each(function (d) {
-        registerTooltip?.(
-          this,
-          `<strong>${d.horizon}</strong><br>Risk: ${d.risk}<br>Range: ${d.lower} – ${d.upper}`
-        );
+        registerTooltip?.(this, `<strong>${d.horizon}</strong><br>Risk: ${d.risk}<br>Range: ${d.lower} – ${d.upper}`);
       });
 
-    const axisX = d3.axisBottom(x).tickSize(0);
-    const axisY = d3.axisLeft(y).ticks(4).tickSize(-width + margin.left + margin.right);
+    svg
+      .append("g")
+      .attr("transform", `translate(0, ${height - margin.bottom})`)
+      .attr("color", "rgba(148,163,184,0.6)")
+      .call(d3.axisBottom(x).tickSize(0))
+      .selectAll("text")
+      .style("font-size", "11px");
+    svg
+      .append("g")
+      .attr("transform", `translate(${margin.left}, 0)`)
+      .attr("color", "rgba(148,163,184,0.3)")
+      .call(d3.axisLeft(y).ticks(4).tickSize(-width + margin.left + margin.right))
+      .selectAll("text")
+      .style("font-size", "11px");
 
-    svg.append("g").attr("transform", `translate(0, ${height - margin.bottom})`).attr("color", "rgba(148,163,184,0.6)").call(axisX).selectAll("text").style("font-size", "11px");
-    svg.append("g").attr("transform", `translate(${margin.left}, 0)`).attr("color", "rgba(148,163,184,0.3)").call(axisY).selectAll("text").style("font-size", "11px");
+    const riskiest = forecastBands.reduce((best, entry) => (entry.risk > best.risk ? entry : best), forecastBands[0]);
+    setChartSummary("exec-forecast", `${riskiest.horizon} horizon has the highest risk score (${riskiest.risk}).`);
   }
 }
 
-function drawAdvertisingCharts(registerTooltip) {
+function drawAdvertisingCharts(registerTooltip, data) {
+  if (!data) return;
+  const { spendOverTime, channelMix, narrativeCorrelation, budgetMix } = data;
+
   const spendPerformance = clearChart("ads-spend-performance");
-  if (spendPerformance) {
+  if (spendPerformance && spendOverTime?.length) {
     const width = spendPerformance.clientWidth || 520;
     const height = spendPerformance.clientHeight || 320;
     const margin = { top: 30, right: 30, bottom: 45, left: 55 };
 
-    const points = d3.range(12).map((i) => ({
-      period: i + 1,
-      spend: Math.random() * 40 + 60,
-      conversions: Math.random() * 35 + 40,
-      sentiment: Math.random() * 20 + 50,
-    }));
-
     const x = d3
       .scaleLinear()
-      .domain([1, points.length])
+      .domain([1, spendOverTime.length])
       .range([margin.left, width - margin.right]);
-    const yLeft = d3.scaleLinear().domain([0, 110]).range([height - margin.bottom, margin.top]);
-    const yRight = d3.scaleLinear().domain([0, 80]).range([height - margin.bottom, margin.top]);
+    const yLeft = d3.scaleLinear().domain([0, d3.max(spendOverTime, (d) => Math.max(d.spend, d.conversions)) * 1.2]).range([height - margin.bottom, margin.top]);
+    const yRight = d3.scaleLinear().domain([0, d3.max(spendOverTime, (d) => d.sentiment) * 1.2]).range([height - margin.bottom, margin.top]);
 
-    const svg = d3.select(spendPerformance).append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("aria-hidden", "true");
+    const svg = d3
+      .select(spendPerformance)
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("aria-hidden", "true");
 
     svg
       .append("path")
-      .datum(points)
+      .datum(spendOverTime)
       .attr("fill", "rgba(96,165,250,0.15)")
       .attr("stroke", "#60a5fa")
       .attr("stroke-width", 2)
@@ -1268,7 +1368,7 @@ function drawAdvertisingCharts(registerTooltip) {
         "d",
         d3
           .area()
-          .x((d) => x(d.period))
+          .x((d) => x(d.week))
           .y0(yLeft(0))
           .y1((d) => yLeft(d.spend))
           .curve(d3.curveMonotoneX)
@@ -1276,19 +1376,19 @@ function drawAdvertisingCharts(registerTooltip) {
 
     const lineConversions = d3
       .line()
-      .x((d) => x(d.period))
+      .x((d) => x(d.week))
       .y((d) => yLeft(d.conversions))
       .curve(d3.curveMonotoneX);
 
     const lineSentiment = d3
       .line()
-      .x((d) => x(d.period))
+      .x((d) => x(d.week))
       .y((d) => yRight(d.sentiment))
       .curve(d3.curveMonotoneX);
 
     svg
       .append("path")
-      .datum(points)
+      .datum(spendOverTime)
       .attr("fill", "none")
       .attr("stroke", "#f97316")
       .attr("stroke-width", 2)
@@ -1296,7 +1396,7 @@ function drawAdvertisingCharts(registerTooltip) {
 
     svg
       .append("path")
-      .datum(points)
+      .datum(spendOverTime)
       .attr("fill", "none")
       .attr("stroke", "#22c55e")
       .attr("stroke-width", 2)
@@ -1305,92 +1405,102 @@ function drawAdvertisingCharts(registerTooltip) {
 
     svg
       .selectAll(".point-spend")
-      .data(points)
+      .data(spendOverTime)
       .join("circle")
       .attr("class", "point-spend")
-      .attr("cx", (d) => x(d.period))
+      .attr("cx", (d) => x(d.week))
       .attr("cy", (d) => yLeft(d.conversions))
       .attr("r", 4)
       .attr("fill", "#f97316")
       .each(function (d) {
         registerTooltip?.(
           this,
-          `<strong>Week ${d.period}</strong><br>Spend: ${d.spend.toFixed(
-            1
-          )}k<br>Conversions: ${d.conversions.toFixed(
-            1
-          )}k<br>Sentiment: ${d.sentiment.toFixed(1)} pts`
+          `<strong>Week ${d.week}</strong><br>Spend: ${d.spend.toFixed(1)}k<br>Conversions: ${d.conversions.toFixed(1)}k<br>Sentiment: ${d.sentiment.toFixed(1)} pts`
         );
       });
 
-    const axisX = d3.axisBottom(x).ticks(points.length).tickFormat((d) => `W${d}`);
-    const axisLeft = d3.axisLeft(yLeft).ticks(5).tickFormat((d) => `${d}k`);
-    const axisRight = d3.axisRight(yRight).ticks(5).tickFormat((d) => `${d}pts`);
+    svg
+      .append("g")
+      .attr("transform", `translate(0, ${height - margin.bottom})`)
+      .attr("color", "rgba(148,163,184,0.6)")
+      .call(d3.axisBottom(x).ticks(spendOverTime.length).tickFormat((d) => `W${d}`))
+      .selectAll("text")
+      .style("font-size", "11px");
 
-    svg.append("g").attr("transform", `translate(0, ${height - margin.bottom})`).attr("color", "rgba(148,163,184,0.6)").call(axisX).selectAll("text").style("font-size", "11px");
-    svg.append("g").attr("transform", `translate(${margin.left}, 0)`).attr("color", "rgba(148,163,184,0.6)").call(axisLeft).selectAll("text").style("font-size", "11px");
-    svg.append("g").attr("transform", `translate(${width - margin.right}, 0)`).attr("color", "rgba(148,163,184,0.6)").call(axisRight).selectAll("text").style("font-size", "11px");
+    svg
+      .append("g")
+      .attr("transform", `translate(${margin.left}, 0)`)
+      .attr("color", "rgba(148,163,184,0.6)")
+      .call(d3.axisLeft(yLeft).ticks(5).tickFormat((d) => `${d}k`))
+      .selectAll("text")
+      .style("font-size", "11px");
+
+    svg
+      .append("g")
+      .attr("transform", `translate(${width - margin.right}, 0)`)
+      .attr("color", "rgba(148,163,184,0.6)")
+      .call(d3.axisRight(yRight).ticks(5))
+      .selectAll("text")
+      .style("font-size", "11px");
+
+    const latestWeek = spendOverTime[spendOverTime.length - 1];
+    setChartSummary(
+      "ads-spend-performance",
+      `Week ${latestWeek.week} spend ${latestWeek.spend.toFixed(1)}k with conversions ${latestWeek.conversions.toFixed(
+        1
+      )}k and sentiment ${latestWeek.sentiment.toFixed(1)}.`
+    );
   }
 
   const channelContainer = clearChart("ads-channel");
-  if (channelContainer) {
+  if (channelContainer && channelMix?.length) {
     const width = channelContainer.clientWidth || 260;
     const height = channelContainer.clientHeight || 200;
     const radius = Math.min(width, height) / 2 - 10;
 
-    const channels = [
-      { label: "Twitter", value: 34, color: "#3b82f6" },
-      { label: "Facebook", value: 28, color: "#6366f1" },
-      { label: "TikTok", value: 19, color: "#a855f7" },
-      { label: "LinkedIn", value: 12, color: "#22d3ee" },
-      { label: "Other", value: 7, color: "#f97316" },
-    ];
-
-    const svg = d3.select(channelContainer).append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("aria-hidden", "true").append("g").attr("transform", `translate(${width / 2}, ${height / 2})`);
+    const svg = d3
+      .select(channelContainer)
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("aria-hidden", "true")
+      .append("g")
+      .attr("transform", `translate(${width / 2}, ${height / 2})`);
 
     const pie = d3.pie().value((d) => d.value);
     const arc = d3.arc().innerRadius(radius * 0.5).outerRadius(radius);
 
-    const channelSlices = svg
+    const slices = svg
       .selectAll("path")
-      .data(pie(channels))
+      .data(pie(channelMix))
       .join("path")
       .attr("d", arc)
-      .attr("fill", (d) => d.data.color)
+      .attr("fill", (d, i) => d3.schemeTableau10[i % 10])
       .attr("stroke", "rgba(15,23,42,0.85)")
       .attr("stroke-width", 1.5);
 
-    if (typeof registerTooltip === "function") {
-      channelSlices.each(function (d) {
-        registerTooltip(
-          this,
-          `<strong>${d.data.label}</strong><br>${d.data.value}% of spend`
-        );
-      });
-    }
+    slices.each(function (d) {
+      registerTooltip?.(this, `<strong>${d.data.label}</strong><br>${d.data.value}% of spend`);
+    });
   }
 
   const corrContainer = clearChart("ads-correlation");
-  if (corrContainer) {
+  if (corrContainer && narrativeCorrelation?.length) {
     const width = corrContainer.clientWidth || 260;
     const height = corrContainer.clientHeight || 200;
     const margin = { top: 20, right: 20, bottom: 40, left: 45 };
 
-    const metrics = [
-      { narrative: "Sustainability", spend: 25, sentiment: 18 },
-      { narrative: "Innovation", spend: 32, sentiment: 20 },
-      { narrative: "Trust", spend: 18, sentiment: 11 },
-      { narrative: "Crisis", spend: 15, sentiment: -9 },
-    ];
+    const x = d3.scaleLinear().domain([0, d3.max(narrativeCorrelation, (d) => d.spend) * 1.2]).range([margin.left, width - margin.right]);
+    const y = d3.scaleLinear().domain([d3.min(narrativeCorrelation, (d) => d.sentiment) - 5, d3.max(narrativeCorrelation, (d) => d.sentiment) + 5]).range([height - margin.bottom, margin.top]);
 
-    const x = d3.scaleLinear().domain([0, 40]).range([margin.left, width - margin.right]);
-    const y = d3.scaleLinear().domain([-20, 25]).range([height - margin.bottom, margin.top]);
-
-    const svg = d3.select(corrContainer).append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("aria-hidden", "true");
+    const svg = d3
+      .select(corrContainer)
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("aria-hidden", "true");
 
     svg
       .selectAll("circle")
-      .data(metrics)
+      .data(narrativeCorrelation)
       .join("circle")
       .attr("cx", (d) => x(d.spend))
       .attr("cy", (d) => y(d.sentiment))
@@ -1398,49 +1508,40 @@ function drawAdvertisingCharts(registerTooltip) {
       .attr("fill", (d) => (d.sentiment >= 0 ? "#22c55e" : "#ef4444"))
       .attr("opacity", 0.85)
       .each(function (d) {
-        registerTooltip?.(
-          this,
-          `<strong>${d.narrative}</strong><br>Spend: ${d.spend}k<br>Sentiment shift: ${d.sentiment}`
-        );
+        registerTooltip?.(this, `<strong>${d.narrative}</strong><br>Spend: ${d.spend}k<br>Sentiment shift: ${d.sentiment}`);
       });
 
-    svg
-      .append("line")
-      .attr("x1", x(0))
-      .attr("x2", x(40))
-      .attr("y1", y(0))
-      .attr("y2", y(0))
-      .attr("stroke", "rgba(148,163,184,0.3)")
-      .attr("stroke-width", 1);
-
-    const axisX = d3.axisBottom(x).ticks(4).tickFormat((d) => `${d}k`);
-    const axisY = d3.axisLeft(y).ticks(5);
-
-    svg.append("g").attr("transform", `translate(0, ${height - margin.bottom})`).attr("color", "rgba(148,163,184,0.6)").call(axisX).selectAll("text").style("font-size", "11px");
-    svg.append("g").attr("transform", `translate(${margin.left}, 0)`).attr("color", "rgba(148,163,184,0.6)").call(axisY).selectAll("text").style("font-size", "11px");
+    const strongest = narrativeCorrelation.reduce((best, entry) =>
+      entry.sentiment > best.sentiment ? entry : best
+    );
+    setChartSummary(
+      "ads-correlation",
+      `${strongest.narrative} shows the largest positive sentiment shift (${strongest.sentiment}) at spend ${strongest.spend}k.`
+    );
   }
 
   const budgetContainer = clearChart("ads-budget");
-  if (budgetContainer) {
+  if (budgetContainer && budgetMix?.length) {
     const width = budgetContainer.clientWidth || 260;
     const height = budgetContainer.clientHeight || 200;
     const margin = { top: 30, right: 20, bottom: 35, left: 60 };
 
-    const segments = [
-      { label: "Paid Media", value: 54 },
-      { label: "Influencers", value: 21 },
-      { label: "Owned", value: 15 },
-      { label: "Earned", value: 10 },
-    ];
+    const y = d3
+      .scaleBand()
+      .domain(budgetMix.map((d) => d.label))
+      .range([margin.top, height - margin.bottom])
+      .padding(0.3);
+    const x = d3.scaleLinear().domain([0, d3.max(budgetMix, (d) => d.value)]).range([margin.left, width - margin.right]);
 
-    const y = d3.scaleBand().domain(segments.map((d) => d.label)).range([margin.top, height - margin.bottom]).padding(0.3);
-    const x = d3.scaleLinear().domain([0, 60]).range([margin.left, width - margin.right]);
-
-    const svg = d3.select(budgetContainer).append("svg").attr("viewBox", `0 0 ${width} ${height}`).attr("aria-hidden", "true");
+    const svg = d3
+      .select(budgetContainer)
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("aria-hidden", "true");
 
     svg
       .selectAll("rect")
-      .data(segments)
+      .data(budgetMix)
       .join("rect")
       .attr("x", x(0))
       .attr("y", (d) => y(d.label))
@@ -1453,7 +1554,209 @@ function drawAdvertisingCharts(registerTooltip) {
         registerTooltip?.(this, `<strong>${d.label}</strong><br>${d.value}% of budget`);
       });
 
-    const axisY = d3.axisLeft(y).tickSize(0);
-    svg.append("g").attr("transform", `translate(${margin.left}, 0)`).attr("color", "rgba(148,163,184,0.7)").call(axisY).selectAll("text").style("font-size", "11px");
+    svg
+      .append("g")
+      .attr("transform", `translate(${margin.left}, 0)`)
+      .attr("color", "rgba(148,163,184,0.7)")
+      .call(d3.axisLeft(y).tickSize(0))
+      .selectAll("text")
+      .style("font-size", "11px");
+
+    const topAllocation = budgetMix.reduce((best, segment) => (segment.value > best.value ? segment : best), budgetMix[0]);
+    setChartSummary("ads-budget", `${topAllocation.label} receives the highest allocation (${topAllocation.value}%).`);
   }
+}
+
+const externalScriptCache = {};
+function loadExternalScript(src) {
+  if (externalScriptCache[src]) return externalScriptCache[src];
+  externalScriptCache[src] = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load script ${src}`));
+    document.head.appendChild(script);
+  }).catch((error) => {
+    delete externalScriptCache[src];
+    throw error;
+  });
+  return externalScriptCache[src];
+}
+
+function parseBreakdownKey(key) {
+  return key.split("|").reduce((acc, segment) => {
+    const [field, value] = segment.split("=");
+    acc[field] = value;
+    return acc;
+  }, {});
+}
+
+function mapHeatmapData(response) {
+  const breakdown = response?.metrics?.find((metric) => metric.kpi === "activity_index")?.breakdown || {};
+  return Object.entries(breakdown).map(([key, value]) => {
+    const parts = parseBreakdownKey(key);
+    return {
+      region: parts.region,
+      category: parts.category,
+      value,
+    };
+  });
+}
+
+function mapOriginTimeline(response) {
+  const organic = response?.metrics?.find((metric) => metric.kpi === "origin_volume_organic")?.breakdown || {};
+  const synthetic = response?.metrics?.find((metric) => metric.kpi === "origin_volume_synthetic")?.breakdown || {};
+  const uniqueKeys = new Set([...Object.keys(organic), ...Object.keys(synthetic)]);
+  return Array.from(uniqueKeys)
+    .map((key) => {
+      const parts = parseBreakdownKey(key);
+      const date = parts.date || key;
+      return {
+        date,
+        organic: organic[key] ?? 0,
+        synthetic: synthetic[key] ?? 0,
+      };
+    })
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
+function mapPlatformShare(response) {
+  const breakdown = response?.metrics?.find((metric) => metric.kpi === "platform_share")?.breakdown || {};
+  return Object.entries(breakdown).map(([key, value]) => {
+    const parts = parseBreakdownKey(key);
+    return {
+      label: parts.platform || key,
+      value,
+    };
+  });
+}
+
+function mapSentimentSeries(response) {
+  const seriesNames = [
+    { key: "sentiment_overall", prop: "overall" },
+    { key: "sentiment_authentic", prop: "authentic" },
+    { key: "sentiment_synthetic", prop: "synthetic" },
+  ];
+  const merged = {};
+
+  seriesNames.forEach(({ key, prop }) => {
+    const breakdown = response?.metrics?.find((metric) => metric.kpi === key)?.breakdown || {};
+    Object.entries(breakdown).forEach(([hour, value]) => {
+      const parts = parseBreakdownKey(hour);
+      const slot = parts.hour || hour;
+      if (!merged[slot]) merged[slot] = { hour: slot };
+      merged[slot][prop] = value;
+    });
+  });
+
+  return Object.values(merged)
+    .map((entry) => ({
+      hour: entry.hour,
+      overall: entry.overall ?? 0,
+      authentic: entry.authentic ?? 0,
+      synthetic: entry.synthetic ?? 0,
+    }))
+    .sort((a, b) => new Date(a.hour) - new Date(b.hour));
+}
+
+function mapGeoBreakdown(response) {
+  const intensity = response?.metrics?.find((metric) => metric.kpi === "geo_intensity")?.breakdown || {};
+  const trend = response?.metrics?.find((metric) => metric.kpi === "geo_trend_pct")?.breakdown || {};
+  const sentiment = response?.metrics?.find((metric) => metric.kpi === "geo_sentiment_shift")?.breakdown || {};
+
+  const regions = new Set([...Object.keys(intensity), ...Object.keys(trend), ...Object.keys(sentiment)]);
+  return Array.from(regions).map((key) => {
+    const parts = parseBreakdownKey(key);
+    const regionName = parts.region || key;
+    return {
+      name: regionName,
+      intensity: intensity[key] ?? 0,
+      trendPct: trend[key] ?? 0,
+      sentimentShift: sentiment[key] ?? 0,
+    };
+  });
+}
+
+function mapCoordinationSeries(metricsResponse) {
+  const metric = metricsResponse?.find((entry) => entry.kpi === "coordination_index");
+  const breakdown = metric?.breakdown || {};
+  return Object.entries(breakdown)
+    .map(([key, value]) => {
+      const parts = parseBreakdownKey(key);
+      return {
+        hour: Number(parts.hour ?? key),
+        value,
+      };
+    })
+    .sort((a, b) => a.hour - b.hour);
+}
+
+function emitErrorStates(needs, message) {
+  Object.entries(needs).forEach(([key, required]) => {
+    if (required) {
+      emitErrorForKey(key, message);
+    }
+  });
+}
+
+function emitErrorForKey(key, message) {
+  const containers = ERROR_CONTAINER_MAP[key] || [];
+  containers.forEach((id) => renderChartError(id, message));
+}
+
+function renderChartError(containerId, message) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = `<div class="chart-error" role="status">${message}</div>`;
+}
+
+function renderDashboardTrends(trends) {
+  document.querySelectorAll("[data-sparkline]").forEach((node) => {
+    const key = node.getAttribute("data-sparkline");
+    const series = trends?.[key];
+    if (!Array.isArray(series) || !series.length) {
+      node.textContent = "Trend unavailable";
+      return;
+    }
+    node.innerHTML = "";
+    const max = Math.max(...series);
+    const min = Math.min(...series);
+    series.forEach((value) => {
+      const bar = document.createElement("span");
+      bar.className = "sparkline__bar";
+      const normalized = max === min ? 0.5 : (value - min) / (max - min);
+      bar.style.height = `${Math.max(20, normalized * 100)}%`;
+      node.appendChild(bar);
+    });
+    node.setAttribute(
+      "aria-label",
+      `${key.replace(/_/g, " ")} trend: ${series.join(", ")}`
+    );
+  });
+}
+
+function setChartSummary(containerId, summary) {
+  if (!summary) return;
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  let summaryNode = container.querySelector(".chart-summary");
+  const summaryId = `${containerId}-summary`;
+  if (!summaryNode) {
+    summaryNode = document.createElement("p");
+    summaryNode.className = "sr-only chart-summary";
+    summaryNode.id = summaryId;
+    container.appendChild(summaryNode);
+  }
+  summaryNode.textContent = summary;
+  if (!summaryNode.id) {
+    summaryNode.id = summaryId;
+  }
+  const describedBy = new Set(
+    (container.getAttribute("aria-describedby") || "")
+      .split(/\s+/)
+      .filter(Boolean)
+  );
+  describedBy.add(summaryNode.id);
+  container.setAttribute("aria-describedby", Array.from(describedBy).join(" "));
 }
