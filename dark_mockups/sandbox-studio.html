@@ -9,7 +9,7 @@
   <title>Genaro — Sandbox Studio</title>
   <link href="style.css" rel="stylesheet">
 </head>
-<body class="page-shell" data-page="sandbox">
+<body class="page-shell" data-page="sandbox" data-narrative-id="nar-global-ops" data-brand-id="brand-genaro">
   <a class="skip-link" href="#main">Skip to main content</a>
   <header class="top-bar">
     <div class="brand">
@@ -39,7 +39,13 @@
         "executive-briefing.html">Executive Briefing</a>
         <a data-nav="advertising" href=
         "advertising-dashboard.html">Advertising Dashboard</a>
-      </nav>
+      </nav><button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true" data-theme-toggle-icon>🌙</span>
+        <span class="sr-only" data-theme-toggle-label>Switch to Light Theme</span>
+      </button><button class="layout-toggle" type="button" data-layout-toggle aria-pressed="false">
+        <span class="sr-only" data-layout-toggle-label>Expand layout</span>
+        <span aria-hidden="true">⇱</span>
+      </button>
       <div class="status-pill status-pill--success">
         Ethical Clearance ✓
       </div><button class="pill pill--outline-red">Deploy to
@@ -436,6 +442,7 @@
   "https://cdn.jsdelivr.net/npm/tippy.js@6/dist/tippy-bundle.umd.min.js"></script>
   
   <script defer src="https://cdn.jsdelivr.net/npm/d3@7"></script> 
+  <script defer src="mock-api.js"></script> 
   <script defer src="charts.js"></script> 
   <script defer src="app.js"></script>
 </body>

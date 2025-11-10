@@ -9,7 +9,7 @@
   <title>Genaro — Unified Command Dashboard</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body data-page="dashboard" class="page-shell">
+<body data-page="dashboard" data-narrative-id="nar-global-ops" data-brand-id="brand-genaro" class="page-shell">
   <a class="skip-link" href="#main">Skip to main content</a>
   <header class="top-bar">
     <div class="brand">
@@ -40,6 +40,14 @@
         "advertising-dashboard.html" data-nav=
         "advertising">Advertising Dashboard</a>
       </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true" data-theme-toggle-icon>🌙</span>
+        <span class="sr-only" data-theme-toggle-label>Switch to Light Theme</span>
+      </button>
+      <button class="layout-toggle" type="button" data-layout-toggle aria-pressed="false">
+        <span class="sr-only" data-layout-toggle-label>Expand layout</span>
+        <span aria-hidden="true">⇱</span>
+      </button>
       <div class="status-pill status-pill--warning">
         Threat Level: Elevated
       </div>
@@ -66,12 +74,16 @@
                   <span>vs. last 7 days</span>
                 </div>
               </div>
+              <div class="sparkline sparkline--tiny" data-sparkline="threat_index"></div>
             </div>
             <p class="metric-trend flat">Industry Benchmark: 45</p>
             <div class="gauge-labels">
               <span>Low</span> <span>Medium</span>
               <span>Critical</span>
             </div>
+            <p class="insight-line" aria-label="Escalations summary">
+              Escalations: <strong>5</strong> · Confidence Guardrail: <strong>87%</strong>
+            </p>
           </div>
         </div>
       </div>
@@ -87,26 +99,49 @@
             </div>
             <p class="metric-trend flat">Active Operations: 18</p>
           </div>
-          <div class="sparkline">
-            Activity Sparkline
-          </div>
+          <div class="sparkline" data-sparkline="narratives_monitored" aria-label="Narratives trend"></div>
         </div>
-        <div class="legend">
-          <div class="legend-item">
+        <div class="grid legend legend--stacked" aria-label="Narrative segments">
+          <div class="legend-item" data-tippy-content="Emerging narratives represent 52% of total volume">
             <span class="legend-dot" style=
             "background:var(--accent-blue);" aria-hidden=
-            "true">&nbsp;</span>Emerging
+            "true">&nbsp;</span>
+            <div>
+              <strong>Emerging</strong>
+              <p class="metric-trend flat">12,430 narratives</p>
+              <span class="metric-badge">52%</span>
+            </div>
           </div>
-          <div class="legend-item">
+          <div class="legend-item" data-tippy-content="Volatile narratives account for 37% of observations">
             <span class="legend-dot" style=
             "background:var(--accent-amber);" aria-hidden=
-            "true">&nbsp;</span>Volatile
+            "true">&nbsp;</span>
+            <div>
+              <strong>Volatile</strong>
+              <p class="metric-trend flat">8,710 narratives</p>
+              <span class="metric-badge metric-badge--amber">37%</span>
+            </div>
           </div>
-          <div class="legend-item">
+          <div class="legend-item" data-tippy-content="Critical narratives currently represent 11% of monitored set">
             <span class="legend-dot" style=
             "background:var(--accent-red);" aria-hidden=
-            "true">&nbsp;</span>Critical
+            "true">&nbsp;</span>
+            <div>
+              <strong>Critical</strong>
+              <p class="metric-trend flat">2,707 narratives</p>
+              <span class="metric-badge metric-badge--red">11%</span>
+            </div>
           </div>
+        </div>
+        <div class="tag-cloud" aria-label="Top trending tags">
+          <span>#SupplyChain</span>
+          <span>#EnergyCrisis</span>
+          <span>#ElectionWatch</span>
+          <span>#AICompliance</span>
+        </div>
+        <div class="card-actions">
+          <a class="pill pill--outline-indigo" href="narrative-tracker.html">Open Narrative Tracker</a>
+          <a class="pill pill--outline-indigo" href="executive-briefing.html">Generate Briefing</a>
         </div>
       </div>
       <div class="card">
@@ -303,15 +338,8 @@
   <script src=
   "https://cdn.jsdelivr.net/npm/tippy.js@6/dist/tippy-bundle.umd.min.js"
   defer></script> 
-  <script src=
-  "https://cdn.jsdelivr.net/npm/shepherd.js@8.5.1/dist/js/shepherd.min.js"
-  defer></script>
-  <link rel="stylesheet" href=
-  "https://cdn.jsdelivr.net/npm/shepherd.js@8.5.1/dist/css/shepherd.css">
-  <script src=
-  "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"
-  defer></script> 
   <script src="https://cdn.jsdelivr.net/npm/d3@7" defer></script> 
+  <script src="mock-api.js" defer></script> 
   <script src="charts.js" defer></script> 
   <script src="app.js" defer></script>
 </body>
