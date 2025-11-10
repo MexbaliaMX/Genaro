@@ -128,14 +128,32 @@ function drawNarrativeGlobe() {
   const halo = new THREE.Mesh(haloGeometry, haloMaterial);
   scene.add(halo);
 
+  let animationFrameId = null;
+  let isPaused = false;
+
   const animate = () => {
+    if (isPaused) return;
     globe.rotation.y += 0.0009;
     points.rotation.y += 0.0014;
     halo.rotation.y += 0.0006;
     renderer.render(scene, camera);
-    requestAnimationFrame(animate);
+    animationFrameId = requestAnimationFrame(animate);
   };
   animate();
+
+  const handleVisibilityChange = () => {
+    if (document.hidden) {
+      isPaused = true;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    } else if (isPaused) {
+      isPaused = false;
+      animate();
+    }
+  };
+  document.addEventListener("visibilitychange", handleVisibilityChange);
 
   const handleResize = () => {
     const newWidth = container.clientWidth || width;
@@ -807,6 +825,88 @@ function drawSandboxNetwork(registerTooltip) {
 
     node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
   });
+
+  const audienceContainer = clearChart("sandbox-audience");
+  if (audienceContainer) {
+    const width = audienceContainer.clientWidth || 280;
+    const height = audienceContainer.clientHeight || 220;
+    const margin = { top: 20, right: 20, bottom: 30, left: 60 };
+
+    const segments = [
+      { segment: "Analysts", engagement: 82, sentiment: 0.34 },
+      { segment: "Investors", engagement: 68, sentiment: 0.48 },
+      { segment: "Advocates", engagement: 91, sentiment: 0.62 },
+      { segment: "Skeptics", engagement: 47, sentiment: -0.21 },
+      { segment: "Regulators", engagement: 55, sentiment: 0.12 },
+    ];
+
+    const y = d3
+      .scaleBand()
+      .domain(segments.map((d) => d.segment))
+      .range([margin.top, height - margin.bottom])
+      .padding(0.25);
+    const x = d3.scaleLinear().domain([0, 100]).range([margin.left, width - margin.right]);
+    const color = d3.scaleSequential().domain([-0.3, 0.7]).interpolator(d3.interpolateRdYlGn);
+
+    const svg = d3
+      .select(audienceContainer)
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("aria-hidden", "true");
+
+    svg
+      .selectAll("rect")
+      .data(segments)
+      .join("rect")
+      .attr("x", margin.left + 2)
+      .attr("y", (d) => y(d.segment))
+      .attr("width", (d) => Math.max(4, x(d.engagement) - margin.left))
+      .attr("height", y.bandwidth())
+      .attr("rx", 8)
+      .attr("fill", (d) => color(d.sentiment))
+      .each(function (d) {
+        registerTooltip?.(
+          this,
+          `<strong>${d.segment}</strong><br>Engagement: ${d.engagement}%<br>Sentiment: ${(d.sentiment * 100).toFixed(0)}%`
+        );
+      });
+
+    svg
+      .selectAll("circle")
+      .data(segments)
+      .join("circle")
+      .attr("cx", (d) => x(d.engagement))
+      .attr("cy", (d) => y(d.segment) + y.bandwidth() / 2)
+      .attr("r", 6)
+      .attr("fill", "#0ea5e9")
+      .attr("stroke", "rgba(15,23,42,0.85)")
+      .attr("stroke-width", 1.2);
+
+    svg
+      .selectAll("text")
+      .data(segments)
+      .join("text")
+      .attr("x", margin.left - 8)
+      .attr("y", (d) => y(d.segment) + y.bandwidth() / 2 + 4)
+      .attr("text-anchor", "end")
+      .attr("fill", "rgba(148,163,184,0.9)")
+      .attr("font-size", "12px")
+      .text((d) => d.segment);
+
+    const axisX = d3
+      .axisBottom(x)
+      .tickValues([0, 25, 50, 75, 100])
+      .tickFormat((d) => `${d}%`)
+      .tickSize(0);
+
+    svg
+      .append("g")
+      .attr("transform", `translate(0, ${height - margin.bottom})`)
+      .attr("color", "rgba(148,163,184,0.6)")
+      .call(axisX)
+      .selectAll("text")
+      .style("font-size", "11px");
+  }
 }
 
 function drawExecutiveCharts(registerTooltip) {
@@ -858,6 +958,84 @@ function drawExecutiveCharts(registerTooltip) {
 
     svg.append("g").attr("transform", `translate(0, ${height - margin.bottom})`).attr("color", "rgba(148,163,184,0.6)").call(axisX).selectAll("text").style("font-size", "12px");
     svg.append("g").attr("transform", `translate(${margin.left}, 0)`).attr("color", "rgba(148,163,184,0.3)").call(axisY).selectAll("text").style("font-size", "11px");
+  }
+
+  const distributionContainer = clearChart("exec-distribution");
+  if (distributionContainer) {
+    const width = distributionContainer.clientWidth || 320;
+    const height = distributionContainer.clientHeight || 200;
+    const gridSpacing = 40;
+
+    const hubs = [
+      { region: "North America", recipients: 6, share: 0.36, coords: [0.25, 0.35] },
+      { region: "Europe", recipients: 4, share: 0.24, coords: [0.55, 0.30] },
+      { region: "APAC", recipients: 3, share: 0.18, coords: [0.78, 0.42] },
+      { region: "LATAM", recipients: 2, share: 0.12, coords: [0.38, 0.65] },
+      { region: "Middle East & Africa", recipients: 2, share: 0.10, coords: [0.62, 0.58] },
+    ];
+
+    const maxRecipients = d3.max(hubs, (d) => d.recipients) || 1;
+    const color = d3
+      .scaleSequential()
+      .domain([0, maxRecipients])
+      .interpolator(d3.interpolatePuBuGn);
+    const radius = d3.scaleSqrt().domain([0, maxRecipients]).range([8, 26]);
+
+    const svg = d3
+      .select(distributionContainer)
+      .append("svg")
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("aria-hidden", "true");
+
+    const grid = svg.append("g").attr("stroke", "rgba(148,163,184,0.15)").attr("stroke-width", 1);
+    for (let x = gridSpacing; x < width; x += gridSpacing) {
+      grid.append("line").attr("x1", x).attr("y1", 0).attr("x2", x).attr("y2", height);
+    }
+    for (let y = gridSpacing; y < height; y += gridSpacing) {
+      grid.append("line").attr("x1", 0).attr("y1", y).attr("x2", width).attr("y2", y);
+    }
+
+    const linkGroup = svg.append("g").attr("stroke", "rgba(96,165,250,0.5)").attr("stroke-width", 1.5).attr("stroke-dasharray", "4 4");
+    linkGroup
+      .selectAll("path")
+      .data(hubs)
+      .join("path")
+      .attr("d", (d) => {
+        const [cx, cy] = [width / 2, height / 2];
+        const [tx, ty] = [d.coords[0] * width, d.coords[1] * height];
+        return `M${cx},${cy} Q${(cx + tx) / 2},${(cy + ty) / 2 - 40} ${tx},${ty}`;
+      })
+      .attr("fill", "none");
+
+    const nodes = svg.append("g");
+    nodes
+      .selectAll("circle")
+      .data(hubs)
+      .join("circle")
+      .attr("cx", (d) => d.coords[0] * width)
+      .attr("cy", (d) => d.coords[1] * height)
+      .attr("r", (d) => radius(d.recipients))
+      .attr("fill", (d) => color(d.recipients))
+      .attr("stroke", "rgba(15,23,42,0.85)")
+      .attr("stroke-width", 1.5)
+      .each(function (d) {
+        registerTooltip?.(
+          this,
+          `<strong>${d.region}</strong><br>Recipients: ${d.recipients}<br>Share: ${(d.share * 100).toFixed(0)}%`
+        );
+      });
+
+    nodes
+      .selectAll("text")
+      .data(hubs)
+      .join("text")
+      .attr("x", (d) => d.coords[0] * width)
+      .attr("y", (d) => d.coords[1] * height + radius(d.recipients) + 14)
+      .attr("text-anchor", "middle")
+      .attr("fill", "rgba(148,163,184,0.9)")
+      .attr("font-size", "12px")
+      .attr("font-weight", 500)
+      .text((d) => `${d.region} · ${(d.share * 100).toFixed(0)}%`);
   }
 
   const categoriesContainer = clearChart("exec-categories");
