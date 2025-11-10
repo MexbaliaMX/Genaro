@@ -351,6 +351,7 @@
   const dashboardTrends = {
     threat_index: [58, 60, 61, 63, 65, 66, 67],
     narratives_monitored: [19800, 20500, 21040, 21650, 22380, 23120, 23847],
+    critical_alerts: [11, 13, 12, 15, 17, 16, 18],
   };
 
   class MockApiClient {
