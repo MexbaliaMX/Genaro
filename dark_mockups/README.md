@@ -1,0 +1,60 @@
+# Dark Mockups — Genaro DFT 2.0
+
+High-fidelity, dark-theme HTML prototypes that demonstrate the Genaro DFT 2.0 UI experience. Each
+page includes interactive D3 analytics, a Three.js global narrative visual and accessibility
+affordances (skip links, aria labels, tooltips).
+
+## Structure
+
+```
+dark_mockups/
+├── index.html                # Unified Command Dashboard
+├── narrative-tracker.html    # Narrative intelligence workspace
+├── risk-integrity.html       # Threat detection and forensic console
+├── sandbox-studio.html       # Strategy simulation and ethics studio
+├── executive-briefing.html   # Board-level executive briefing
+├── advertising-dashboard.html# Advertising FINOPS insights
+├── style.css                 # Shared dark theme / component styling
+├── charts.js                 # D3 + Three.js visualizations
+├── app.js                    # Navigation highlighting, timestamp injection
+└── README.md                 # (this file)
+```
+
+## Running Locally
+
+1. From the repository root:
+   ```bash
+   cd dark_mockups
+   python -m http.server 8000
+   ```
+2. Open `http://localhost:8000/index.html` in your browser.
+3. Navigate using the top-right menu to the other mockups.
+
+> **Note:** The Three.js globe requires WebGL; a fallback message is shown if WebGL is unavailable.
+
+## Features
+
+- **Unified Command Dashboard:** KPI tiles, global threat gauge, D3 heatmap and Three.js narrative
+  globe, activity feed.
+- **Narrative Tracker:** Three-column analytical workspace with timeline, platform breakdown, and
+  sentiment wave.
+- **Risk & Integrity:** Multi-panel forensic analysis with bot network graph and coordination
+  timeline.
+- **Sandbox Studio:** Scenario builder, simulation canvas, predictive metrics and ethics advisor.
+- **Executive Briefing:** Executive KPIs, threat landscape, benchmarking and recommendations.
+- **Advertising Dashboard:** Spend vs. performance analytics, channel distribution, narrative
+  correlation, campaign table.
+
+## Data & Next Steps
+
+- All charts currently render synthetic demo data. The `charts.js` module is designed to accept real
+  data via a future `dataService`. See `IntegrationLayer.md` and `api/openapi.yaml` for contract
+  guidance.
+- Key UX controls (filters, AI actions, “Generate Counter-Narrative”, etc.) are presently static.
+  Hook them to backend endpoints or mock handlers when APIs are available.
+- Accessibility audits (Lighthouse/axe) are recommended before production rollout.
+
+## Legacy Mockups
+
+The original light-theme HTML pages remain under `mockups/` for historical reference. New work
+should use the dark mockups as the canonical UX baseline.

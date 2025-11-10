@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genaro — Risk & Integrity Monitor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="risk">
+    <a href="#main" class="visually-hidden visually-hidden-focusable">Skip to main content</a>
+    <header class="d-flex justify-content-between align-items-center p-3 bg-light">
+        <div class="logo">Genaro DFT 2.0</div>
+        <div class="d-flex align-items-center">
+            <button type="button" class="btn btn-link p-0 notifications me-3" aria-label="Open notifications">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bell" viewBox="0 0 16 16">
+                    <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4.5 6H4a2 2 0 0 0-2 2v1.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V8a2 2 0 0 0-2-2h-.5a4.002 4.002 0 0 0-2.703-3.921L8 1.918zM14.22 12c.223.447.176.99-.125 1.385C13.69 13.998 13.19 14 12.5 14H3.5c-.69 0-1.19-.002-1.595-.615-.299-.395-.348-.938-.125-1.385C1.98 11.237 2.5 10.5 3.5 10.5h9c1 0 1.52.737 1.72 1.5z"/>
+                </svg>
+            </button>
+            <div class="user-avatar">
+                <img src="https://via.placeholder.com/40" alt="User Avatar" class="rounded-circle">
+            </div>
+        </div>
+    </header>
+    <nav class="mock-nav" aria-label="Primary navigation">
+        <a href="index.html" data-nav="dashboard">Dashboard</a>
+        <a href="narrative-tracker.html" data-nav="narrative">Narrative Tracker</a>
+        <a href="risk-integrity.html" data-nav="risk">Risk & Integrity</a>
+        <a href="sandbox-studio.html" data-nav="sandbox">Sandbox</a>
+        <a href="executive-briefing.html" data-nav="briefing">Briefings</a>
+        <a href="advertising-dashboard.html" data-nav="advertising">Advertising</a>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <main id="main" class="col-md-12 ms-sm-auto col-lg-12 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Risk & Integrity: Manipulation Alerts</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary">Sev-High (1)</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary">Sev-Medium (2)</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary">Sev-Low (0)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-4 col-lg-2">
+                        <div class="card kpi-card text-white bg-danger">
+                            <div class="card-header">Deepfakes</div>
+                            <div class="card-body">
+                                <h5 class="card-title">1</h5>
+                                <p class="card-text mb-0"><small>Escalada inmediata</small></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4 col-lg-2">
+                        <div class="card kpi-card text-white bg-warning">
+                            <div class="card-header">Bots</div>
+                            <div class="card-body">
+                                <h5 class="card-title">2</h5>
+                                <p class="card-text mb-0"><small>Coordinated behaviour</small></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4 col-lg-2">
+                        <div class="card kpi-card text-white bg-primary">
+                            <div class="card-header">Disinformation</div>
+                            <div class="card-body">
+                                <h5 class="card-title">1</h5>
+                                <p class="card-text mb-0"><small>Pending verification</small></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="card insight-card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Genaro Watchlist</h5>
+                                <p>"The 'New fiscal policy' narrative shows abnormal coordination patterns across regional forums."</p>
+                                <p>"Two bot clusters are reusing identical creative assets. Forensic review recommended."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-6">
+                        <h2>Riesgo por Narrativa</h2>
+                        <div class="placeholder-block radar-chart-placeholder">
+                            <svg viewBox="0 0 200 200" role="img" aria-labelledby="radarTitle">
+                                <title id="radarTitle">Radar chart of risk versus volume</title>
+                                <circle cx="100" cy="100" r="90" fill="#f8fafc"/>
+                                <polygon points="100,20 170,70 140,170 60,170 30,70" fill="#bfdbfe" opacity="0.4"/>
+                                <polygon points="100,40 155,80 130,150 70,150 45,80" fill="#60a5fa" opacity="0.6"/>
+                                <polygon points="100,60 140,90 120,130 80,130 60,90" fill="#1d4ed8" opacity="0.7"/>
+                                <circle cx="100" cy="60" r="5" fill="#1d4ed8" data-tooltip="Fiscal Narrative: High risk, medium volume" tabindex="0"/>
+                                <circle cx="140" cy="90" r="5" fill="#1d4ed8" data-tooltip="CEO Deepfake: Critical risk, high volume" tabindex="0"/>
+                                <circle cx="80" cy="130" r="5" fill="#1d4ed8" data-tooltip="Competitor Rumor: Low risk, low volume" tabindex="0"/>
+                                <polyline points="100,10 100,190" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4 4"/>
+                                <polyline points="20,100 180,100" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="4 4"/>
+                                <text x="100" y="15" text-anchor="middle" font-size="10" fill="#475569">Volume</text>
+                                <text x="180" y="105" font-size="10" fill="#475569">Risk</text>
+                            </svg>
+                            <span class="visually-hidden">Radar chart showing high risk for fiscal narrative</span>
+                        </div>
+                        <p class="placeholder-caption text-center">Volume vs Risk Level</p>
+                    </div>
+                    <div class="col-lg-6">
+                        <h2>Active Alerts</h2>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Narrative</th>
+                                        <th>Risk Type</th>
+                                        <th>Evidence</th>
+                                        <th>Severity</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>New Fiscal Policy</td>
+                                        <td>Deepfake</td>
+                                        <td><a href="#">Link</a></td>
+                                        <td><span class="badge bg-danger">Sev-High</span></td>
+                                        <td>Pending</td>
+                                        <td><button class="btn btn-sm btn-primary">View Details</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>CEO's Recent Statement</td>
+                                        <td>Bot Coordination</td>
+                                        <td><a href="#">Link</a></td>
+                                        <td><span class="badge bg-warning">Sev-Medium</span></td>
+                                        <td>Under Review</td>
+                                        <td><button class="btn btn-sm btn-primary">View Details</button></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Q3 Earnings Report</td>
+                                        <td>Disinformation</td>
+                                        <td><a href="#">Link</a></td>
+                                        <td><span class="badge bg-warning">Sev-Medium</span></td>
+                                        <td>Pending</td>
+                                        <td><button class="btn btn-sm btn-primary">View Details</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="alertDetailModal" tabindex="-1" aria-labelledby="alertDetailModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="alertDetailModalLabel">Alert Detail: Deepfake in "New Fiscal Policy"</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <h6>Visual Evidence</h6>
+                                <img src="https://via.placeholder.com/600x300?text=Deepfake+Evidence" class="img-fluid mb-3" alt="Deepfake evidence preview">
+                                <p>Deepfake Score: 0.87 "likely synthetic"</p>
+                                <h6>Model Explanation</h6>
+                                <p>The model identified lip-sync anomalies, irregular blink cadence, and background artifacts indicating manipulation. Top drivers: `facial_inconsistency`, `visual_artifacts`, `audio_video_sync`.</p>
+                                <h6>Recommended Actions</h6>
+                                <ul>
+                                    <li>Verify original source asset.</li>
+                                    <li>Publish forensic rebuttal.</li>
+                                    <li>Monitor spread across priority platforms.</li>
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Export Evidence Bundle (PDF)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Example to show modal
+        document.querySelectorAll('.table .btn-primary').forEach(button => {
+            button.addEventListener('click', () => {
+                var myModal = new bootstrap.Modal(document.getElementById('alertDetailModal'));
+                myModal.show();
+            });
+        });
+    </script>
+</body>
+</html>

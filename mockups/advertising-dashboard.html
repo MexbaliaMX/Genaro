@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genaro — Advertising Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="advertising">
+    <a href="#main" class="visually-hidden visually-hidden-focusable">Skip to main content</a>
+    <header class="d-flex justify-content-between align-items-center p-3 bg-light">
+        <div class="logo">Genaro DFT 2.0</div>
+        <div class="d-flex align-items-center">
+            <button type="button" class="btn btn-link p-0 notifications me-3" aria-label="Open notifications">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bell" viewBox="0 0 16 16">
+                    <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4.5 6H4a2 2 0 0 0-2 2v1.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V8a2 2 0 0 0-2-2h-.5a4.002 4.002 0 0 0-2.703-3.921L8 1.918zM14.22 12c.223.447.176.99-.125 1.385C13.69 13.998 13.19 14 12.5 14H3.5c-.69 0-1.19-.002-1.595-.615-.299-.395-.348-.938-.125-1.385C1.98 11.237 2.5 10.5 3.5 10.5h9c1 0 1.52.737 1.72 1.5z"/>
+                </svg>
+            </button>
+            <div class="user-avatar">
+                <img src="https://via.placeholder.com/40" alt="User Avatar" class="rounded-circle">
+            </div>
+        </div>
+    </header>
+    <nav class="mock-nav" aria-label="Primary navigation">
+        <a href="index.html" data-nav="dashboard">Dashboard</a>
+        <a href="narrative-tracker.html" data-nav="narrative">Narrative Tracker</a>
+        <a href="risk-integrity.html" data-nav="risk">Risk & Integrity</a>
+        <a href="sandbox-studio.html" data-nav="sandbox">Sandbox</a>
+        <a href="executive-briefing.html" data-nav="briefing">Briefings</a>
+        <a href="advertising-dashboard.html" data-nav="advertising">Advertising</a>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <main id="main" class="col-md-12 ms-sm-auto col-lg-12 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Advertising Dashboard: FINOPS & Performance</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <select class="form-select me-2">
+                            <option selected>Platform: All</option>
+                            <option>Meta</option>
+                            <option>Google</option>
+                        </select>
+                        <select class="form-select me-2">
+                            <option selected>Window: Last 7 days</option>
+                            <option>Last 30 days</option>
+                            <option>Custom</option>
+                        </select>
+                        <span class="h4 mb-0 me-2">Total Spend: $150,000</span>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="card kpi-card text-white bg-primary mb-0">
+                            <div class="card-header">Total Spend</div>
+                            <div class="card-body">
+                                <h5 class="card-title">$150,000</h5>
+                                <small>+12% vs last week</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="card kpi-card text-white bg-info mb-0">
+                            <div class="card-header">Impressions</div>
+                            <div class="card-body">
+                                <h5 class="card-title">25M</h5>
+                                <small>Meta accounts for 60%</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="card kpi-card text-white bg-success mb-0">
+                            <div class="card-header">Clicks</div>
+                            <div class="card-body">
+                                <h5 class="card-title">1.2M</h5>
+                                <small>Average CTR 4.8%</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="card kpi-card text-white bg-warning mb-0">
+                            <div class="card-header">Conversions</div>
+                            <div class="card-body">
+                                <h5 class="card-title">12K</h5>
+                                <small>+9% vs target</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="card kpi-card text-white bg-secondary mb-0">
+                            <div class="card-header">Avg CPC</div>
+                            <div class="card-body">
+                                <h5 class="card-title">$0.12</h5>
+                                <small>-3% after optimization</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="card kpi-card text-white bg-danger mb-0">
+                            <div class="card-header">Avg CPA</div>
+                            <div class="card-body">
+                                <h5 class="card-title">$12.50</h5>
+                                <small>Goal: &lt; $12.00</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4 g-3">
+                    <div class="col-lg-9">
+                        <h2>Spend vs Performance</h2>
+                        <div class="placeholder-block chart-placeholder" style="height: 360px;">
+                            <svg viewBox="0 0 260 160" role="img" aria-labelledby="spendPerformanceTitle">
+                                <title id="spendPerformanceTitle">Spend versus performance</title>
+                                <rect x="0" y="0" width="260" height="160" rx="12" ry="12" fill="#f8fafc"/>
+                                <path d="M20 130 L20 100 L60 90 L100 70 L140 80 L180 60 L220 65 L240 55 L240 130 Z" fill="#bfdbfe" opacity="0.6"/>
+                                <polyline points="20,110 60,95 100,85 140,90 180,70 220,68 240,72" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                                <polyline points="20,120 60,105 100,90 140,95 180,80 220,74 240,78" fill="none" stroke="#f97316" stroke-width="2" stroke-dasharray="6 4" stroke-linecap="round"/>
+                                <circle cx="140" cy="90" r="5" fill="#2563eb" data-tooltip="Day 4: Impressions peak 3.2M" tabindex="0"/>
+                                <circle cx="180" cy="70" r="5" fill="#2563eb" data-tooltip="Day 5: Impressions 3.6M after optimization" tabindex="0"/>
+                                <circle cx="220" cy="68" r="5" fill="#2563eb" data-tooltip="Day 6: Impressions 3.4M" tabindex="0"/>
+                                <circle cx="180" cy="80" r="4" fill="#f97316" data-tooltip="Conversions 2.1K (+14%)" tabindex="0"/>
+                                <circle cx="220" cy="74" r="4" fill="#f97316" data-tooltip="Conversions 2.3K (weekly record)" tabindex="0"/>
+                                <text x="40" y="30" font-size="10" fill="#475569">Spend</text>
+                                <rect x="20" y="22" width="12" height="12" fill="#bfdbfe" rx="2"/>
+                                <text x="110" y="30" font-size="10" fill="#475569">Impressions</text>
+                                <line x1="90" y1="28" x2="102" y2="28" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+                                <text x="190" y="30" font-size="10" fill="#475569">Conversions</text>
+                                <line x1="170" y1="28" x2="185" y2="28" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 4"/>
+                            </svg>
+                            <span class="visually-hidden">Area and line chart comparing spend and conversions</span>
+                        </div>
+                        <p class="placeholder-caption text-center">Spend vs Performance Over Time</p>
+
+                        <h2 class="mt-4">Campaign Table</h2>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Campaign</th>
+                                        <th>Platform</th>
+                                        <th>Spend</th>
+                                        <th>Impressions</th>
+                                        <th>Clicks</th>
+                                        <th>Conversions</th>
+                                        <th>CPC</th>
+                                        <th>CPA</th>
+                                        <th>Linked Narrative</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Summer Push</td>
+                                        <td>Meta</td>
+                                        <td>$50,000</td>
+                                        <td>10M</td>
+                                        <td>500K</td>
+                                        <td>5K</td>
+                                        <td>$0.10</td>
+                                        <td>$10.00</td>
+                                        <td>Sustainability</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Autumn Refresh</td>
+                                        <td>Google</td>
+                                        <td>$70,000</td>
+                                        <td>12M</td>
+                                        <td>600K</td>
+                                        <td>6K</td>
+                                        <td>$0.12</td>
+                                        <td>$11.67</td>
+                                        <td>Innovation</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Winter Retention</td>
+                                        <td>Meta</td>
+                                        <td>$30,000</td>
+                                        <td>3M</td>
+                                        <td>100K</td>
+                                        <td>1K</td>
+                                        <td>$0.30</td>
+                                        <td>$30.00</td>
+                                        <td>New Product</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card insight-card mt-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Active Filters</h5>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span class="badge rounded-pill text-bg-light border">Narrative: All</span>
+                                    <span class="badge rounded-pill text-bg-light border">Campaign: Top 10</span>
+                                    <span class="badge rounded-pill text-bg-light border">Window: Last 7 days</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3">
+                        <h2>Narrative Correlation</h2>
+                        <div class="placeholder-block chart-placeholder" style="height: 260px;">
+                            <svg viewBox="0 0 160 160" role="img" aria-labelledby="scatterTitle">
+                                <title id="scatterTitle">Advertising spend vs sentiment change</title>
+                                <rect x="0" y="0" width="160" height="160" rx="12" ry="12" fill="#f8fafc"/>
+                                <line x1="20" y1="20" x2="20" y2="140" stroke="#e2e8f0" stroke-width="1"/>
+                                <line x1="20" y1="140" x2="140" y2="140" stroke="#e2e8f0" stroke-width="1"/>
+                                <circle cx="50" cy="120" r="6" fill="#0ea5e9" opacity="0.8" data-tooltip="Summer Push: $25K spend, +15% sentiment shift" tabindex="0"/>
+                                <circle cx="80" cy="90" r="7" fill="#f97316" opacity="0.7" data-tooltip="Autumn Refresh: $45K spend, +9% sentiment" tabindex="0"/>
+                                <circle cx="120" cy="70" r="8" fill="#22c55e" opacity="0.75" data-tooltip="Innovation Burst: $60K spend, +18% sentiment" tabindex="0"/>
+                                <circle cx="110" cy="110" r="5" fill="#6366f1" opacity="0.7" data-tooltip="Retention Stream: $30K spend, +4% sentiment" tabindex="0"/>
+                                <text x="140" y="152" font-size="9" text-anchor="end" fill="#475569">Spend</text>
+                                <text x="24" y="28" font-size="9" fill="#475569">Sentiment</text>
+                            </svg>
+                            <span class="visually-hidden">Scatter plot showing campaigns with higher spend driving sentiment gains</span>
+                        </div>
+                        <div class="card insight-card mb-3">
+                            <div class="card-body">
+                                <p class="card-text">"The 'Summer Push' campaign lifted the Sustainability narrative sentiment by 15% on a $25K spend."</p>
+                                <p class="card-text">"Reassign 20% of the Autumn Refresh budget to Winter Retention to amplify the Innovation storyline."</p>
+                            </div>
+                        </div>
+                        <div class="card insight-card">
+                            <div class="card-header bg-transparent fw-semibold">Quick Controls</div>
+                            <div class="card-body">
+                                <button class="btn btn-outline-primary w-100 mb-2">Exportar CSV</button>
+                                <button class="btn btn-outline-secondary w-100">Sincronizar con CFO Suite</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

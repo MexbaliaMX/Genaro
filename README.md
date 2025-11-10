@@ -7,6 +7,7 @@ blueprints while the technical implementation matures.
 ## How To Navigate
 - Read `Genaro.md` for the platform narrative, paradigm shifts, and vertical playbooks.
 - Consult `Agents.md` to understand and maintain the orchestrator story and agent family roles.
+- Review `RepositoryGuidelines.md` before introducing new files, agents, or automation artifacts.
 - Review the mock interface files (`Mock_*.md`) and `UIs.md` when shaping user-facing experiences.
 - Keep strategic primers at the root; move future agent specs into `agents/` and research workbooks
   into `research/` in line with the repository guidelines.
@@ -18,6 +19,11 @@ blueprints while the technical implementation matures.
 - `UIs.md` inventories the command dashboard, sandbox, financial extensions, and other UI surfaces.
 - `Mock_ActiveMonitor.md`, `Mock_ExecutiveBriefing.md`, `Mock_NarrativeTracker.md`,
   `Mock_RiskIntegrity.md`, and `Mock_SandboxStudio.md` define simulation-ready interface blueprints.
+- `dark_mockups/` hosts the high-fidelity dark UI suite with D3/Three.js visualizations. See
+  `dark_mockups/README.md` for instructions and feature summary.
+- `mockups/` retains the legacy light-theme HTML pages for archival comparison.
+- `api/openapi.yaml` and `api/asyncapi.yaml` document the REST and event contracts generated during
+  the integration-layer design.
 
 ## Working Agreements
 - Documentation comes first: land strategic updates here before introducing automation or code.
@@ -27,6 +33,12 @@ blueprints while the technical implementation matures.
   with deterministic tests (`pytest` for Python, `npm test` for TypeScript).
 - Store shared assets under `assets/` with media-specific subfolders (`assets/prompts`, `assets/figures`)
   and cite prompt text inside ```prompt``` fences.
+
+## Previewing the Mockups
+- Serve the dark mockups locally with `python -m http.server 8000` inside `dark_mockups/`, then open
+  `http://localhost:8000/index.html`.
+- The light-theme `mockups/` folder can be launched similarly if you need to review the prior design.
+- Charts currently rely on synthetic data; see `dark_mockups/README.md` for data-integration plans.
 
 ## Command Surface
 - No automation scripts are published yet. Document any new workflow in `README.md` and the script
