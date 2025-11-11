@@ -3,6 +3,11 @@ const DATA_NARRATIVE_ID = BODY_DATA.narrativeId || "nar-global-ops";
 const DATA_BRAND_ID = BODY_DATA.brandId || "brand-genaro";
 const THREE_SRC = "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js";
 const SHOULD_REDUCE_MOTION = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches || false;
+const ALLOWED_TOOLTIP_TAGS = new Set(["STRONG", "BR"]);
+const NODE_TYPES = {
+  ELEMENT: typeof Node !== "undefined" ? Node.ELEMENT_NODE : 1,
+  COMMENT: typeof Node !== "undefined" ? Node.COMMENT_NODE : 8,
+};
 const ERROR_CONTAINER_MAP = {
   heatmap: ["dashboard-heatmap"],
   timeline: ["narrative-timeline"],
@@ -16,25 +21,76 @@ const ERROR_CONTAINER_MAP = {
   advertising: ["ads-spend-performance", "ads-channel", "ads-correlation", "ads-budget"],
 };
 
+function sanitizeTooltipHtml(html) {
+  // Implementation to sanitize HTML content for tooltips
+  if (typeof DOMParser !== "undefined") {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    const sanitized = sanitizeElement(doc.body);
+    return sanitized.innerHTML;
+  } else {
+    // Fallback: basic sanitization
+    const div = document.createElement('div');
+    div.textContent = html;
+    return div.textContent;
+  }
+}
+
+function sanitizeElement(element) {
+  for (let i = element.children.length - 1; i >= 0; i--) {
+    const child = element.children[i];
+    if (!ALLOWED_TOOLTIP_TAGS.has(child.tagName)) {
+      child.remove();
+    } else {
+      sanitizeElement(child);
+    }
+  }
+  return element;
+}
+const D3_CHART_KEYS = [
+  "heatmap",
+  "timeline",
+  "platform",
+  "sentiment",
+  "geo",
+  "riskGraph",
+  "coordination",
+  "sandbox",
+  "executive",
+  "advertising",
+];
+
 document.addEventListener("DOMContentLoaded", () => {
   initNarrativeGlobe();
-  const tippyInstances = [];
+  window.tippyInstances = [];
 
   const registerTooltip = (element, html) => {
     if (typeof tippy === "undefined") return;
+    const sanitizedContent = sanitizeTooltipHtml(html);
     const instance = tippy(element, {
-      content: html,
+      content: sanitizedContent,
       allowHTML: true,
       theme: "custom",
       placement: "top",
       animation: "shift-away",
       appendTo: document.body,
     });
-    tippyInstances.push(instance);
+    window.tippyInstances.push(instance);
   };
 
   hydrateCharts(registerTooltip);
 });
+
+function cleanupTooltips() {
+  if (typeof tippy !== "undefined" && window.tippyInstances) {
+    window.tippyInstances.forEach(instance => {
+      if (instance && typeof instance.destroy === 'function') {
+        instance.destroy();
+      }
+    });
+    window.tippyInstances = [];
+  }
+}
 
 function initNarrativeGlobe() {
   const container = document.getElementById("dashboard-globe");
@@ -68,6 +124,24 @@ async function hydrateCharts(registerTooltip) {
 
   if (!Object.values(needs).some(Boolean)) {
     return;
+  }
+
+  const hasD3 = typeof d3 !== "undefined";
+  if (!hasD3) {
+    const d3DependentNeeds = {};
+    D3_CHART_KEYS.forEach((key) => {
+      if (needs[key]) {
+        d3DependentNeeds[key] = true;
+        needs[key] = false;
+      }
+    });
+    if (Object.keys(d3DependentNeeds).length) {
+      console.warn("D3 library missing — chart rendering skipped");
+      emitErrorStates(d3DependentNeeds, "Visualization library unavailable.");
+    }
+    if (!needs.trends) {
+      return;
+    }
   }
 
   if (!api) {
@@ -1701,6 +1775,10 @@ function emitErrorStates(needs, message) {
 }
 
 function emitErrorForKey(key, message) {
+  if (key === "trends") {
+    renderTrendError(message);
+    return;
+  }
   const containers = ERROR_CONTAINER_MAP[key] || [];
   containers.forEach((id) => renderChartError(id, message));
 }
@@ -1709,6 +1787,35 @@ function renderChartError(containerId, message) {
   const el = document.getElementById(containerId);
   if (!el) return;
   el.innerHTML = `<div class="chart-error" role="status">${message}</div>`;
+}
+
+function sanitizeTooltipHtml(content) {
+  if (content == null) return "";
+  const template = document.createElement("template");
+  template.innerHTML = String(content);
+  const scrubNode = (root) => {
+    Array.from(root.childNodes).forEach((node) => {
+      if (node.nodeType === NODE_TYPES.ELEMENT) {
+        if (!ALLOWED_TOOLTIP_TAGS.has(node.nodeName)) {
+          const textValue = node.textContent || "";
+          root.replaceChild(document.createTextNode(textValue), node);
+        } else {
+          while (node.attributes.length) {
+            node.removeAttribute(node.attributes[0].name);
+          }
+          scrubNode(node);
+        }
+      } else if (node.nodeType === NODE_TYPES.COMMENT) {
+        root.removeChild(node);
+      }
+    });
+  };
+
+  scrubNode(template.content);
+  const container = document.createElement("div");
+  container.appendChild(template.content.cloneNode(true));
+  const sanitized = container.innerHTML.trim();
+  return sanitized || container.textContent || "";
 }
 
 function renderDashboardTrends(trends) {
@@ -1733,6 +1840,14 @@ function renderDashboardTrends(trends) {
       "aria-label",
       `${key.replace(/_/g, " ")} trend: ${series.join(", ")}`
     );
+  });
+}
+
+function renderTrendError(message) {
+  const fallback = message || "Trend data unavailable.";
+  document.querySelectorAll("[data-sparkline]").forEach((node) => {
+    node.textContent = fallback;
+    node.removeAttribute("aria-label");
   });
 }
 

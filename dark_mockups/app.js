@@ -3,13 +3,19 @@ const SHEPHERD_CSS_SRC = "https://cdn.jsdelivr.net/npm/shepherd.js@8.5.1/dist/cs
 const THEME_STORAGE_KEY = "genaroTheme";
 const LAYOUT_STORAGE_KEY = "genaroLayout";
 let shepherdLoaderPromise = null;
+const storageMemoryFallback = new Map();
 
 document.addEventListener("DOMContentLoaded", () => {
   initThemeToggle();
   initLayoutToggle();
+  initStaticTooltips();
   if (typeof dayjs !== "undefined") {
-    dayjs.extend(dayjs_plugin_utc);
-    dayjs.extend(dayjs_plugin_timezone);
+    if (typeof dayjs_plugin_utc === "function") {
+      dayjs.extend(dayjs_plugin_utc);
+    }
+    if (typeof dayjs_plugin_timezone === "function") {
+      dayjs.extend(dayjs_plugin_timezone);
+    }
   }
 
   const timestampNodes = document.querySelectorAll("[data-current-timestamp]");
@@ -60,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initThemeToggle() {
-  const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+  const storedTheme = safeStorageGet(THEME_STORAGE_KEY);
   const initialTheme = storedTheme || "dark";
   applyTheme(initialTheme);
 
@@ -75,7 +81,7 @@ function initThemeToggle() {
 function applyTheme(theme) {
   document.body.dataset.theme = theme;
   document.documentElement.dataset.theme = theme;
-  localStorage.setItem(THEME_STORAGE_KEY, theme);
+  safeStorageSet(THEME_STORAGE_KEY, theme);
   const isLight = theme === "light";
   document.querySelectorAll("[data-theme-toggle]").forEach((toggle) => {
     toggle.setAttribute("aria-pressed", String(isLight));
@@ -146,10 +152,20 @@ function animateKpis() {
 function animateCardsOnScroll() {
   if (typeof anime === "undefined") return;
   const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
-  if (reduceMotion?.matches || typeof IntersectionObserver === "undefined") {
+  if (reduceMotion?.matches) {
     document.querySelectorAll(".card").forEach((card) => {
       card.style.opacity = "";
       card.style.transform = "";
+    });
+    return;
+  }
+  
+  if (typeof IntersectionObserver === "undefined") {
+    // Fallback: animate all cards immediately
+    document.querySelectorAll(".card").forEach((card) => {
+      card.style.opacity = "1";
+      card.style.transform = "translateY(0)";
+      card.dataset.animated = "true";
     });
     return;
   }
@@ -180,7 +196,7 @@ function animateCardsOnScroll() {
 }
 
 function initLayoutToggle() {
-  const storedLayout = localStorage.getItem(LAYOUT_STORAGE_KEY);
+  const storedLayout = safeStorageGet(LAYOUT_STORAGE_KEY);
   const initialLayout = storedLayout || "standard";
   applyLayout(initialLayout);
 
@@ -194,7 +210,7 @@ function initLayoutToggle() {
 
 function applyLayout(layout) {
   document.body.dataset.layout = layout;
-  localStorage.setItem(LAYOUT_STORAGE_KEY, layout);
+  safeStorageSet(LAYOUT_STORAGE_KEY, layout);
   const isWide = layout === "wide";
   document.querySelectorAll("[data-layout-toggle]").forEach((toggle) => {
     toggle.setAttribute("aria-pressed", String(isWide));
@@ -331,4 +347,41 @@ function loadStylesheetOnce(href) {
   });
   loadedStyles.set(href, promise);
   return promise;
+}
+
+function initStaticTooltips() {
+  if (typeof tippy === "undefined") {
+    return;
+  }
+  document.querySelectorAll("[data-tippy-content]").forEach((node) => {
+    if (node.dataset.tippyBound === "true") return;
+    tippy(node, {
+      content: node.getAttribute("data-tippy-content"),
+      allowHTML: false,
+      theme: "custom",
+      appendTo: document.body,
+    });
+    node.dataset.tippyBound = "true";
+  });
+}
+
+function safeStorageGet(key) {
+  try {
+    return window.localStorage?.getItem(key) ?? storageMemoryFallback.get(key) ?? null;
+  } catch {
+    return storageMemoryFallback.get(key) ?? null;
+  }
+}
+
+function safeStorageSet(key, value) {
+  if (value == null) {
+    storageMemoryFallback.delete(key);
+  } else {
+    storageMemoryFallback.set(key, value);
+  }
+  try {
+    window.localStorage?.setItem?.(key, value);
+  } catch {
+    // Ignore; memory fallback already updated.
+  }
 }
