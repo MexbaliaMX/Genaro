@@ -15,13 +15,14 @@
     <div class="brand">
       <div>
         <h1>Advertising Intelligence</h1><span class=
-        "status-pill status-pill--sky">FINOPS & Performance</span>
+        "status-pill status-pill--sky">FINOPS &amp; Performance</span>
       </div>
     </div>
     <div class="top-bar-actions">
       <div class="search-bar">
         <svg width="16" height="16" fill="currentColor"
         aria-hidden="true" viewBox="0 0 16 16">
+        <title>Search Icon</title>
         <path d=
         "M11 6a5 5 0 1 1-1-3.874L10.414 3l.293-.293A1 1 0 0 1 12.414 4l-.293.293L12 4.586l.293.293A1 1 0 0 1 12.414 6l-.293.293L12 6.586l-1.293 1.293A5 5 0 0 1 11 6Z">
         </path></svg> <input type="search" placeholder=
@@ -32,7 +33,7 @@
         <a href="index.html" data-nav="dashboard">Dashboard</a>
         <a href="narrative-tracker.html" data-nav=
         "narrative">Narrative Tracker</a> <a href=
-        "risk-integrity.html" data-nav="risk">Risk & Integrity</a>
+        "risk-integrity.html" data-nav="risk">Risk &amp; Integrity</a>
         <a href="sandbox-studio.html" data-nav="sandbox">Sandbox
         Studio</a> <a href="executive-briefing.html" data-nav=
         "briefing">Executive Briefing</a> <a href=
@@ -213,7 +214,7 @@
         "ads-correlation" role="img" aria-label=
         "Narrative correlation scatter"></div>
         <p class="metric-trend flat">Strong positive correlation
-        with Sustainability & Innovation storylines.</p>
+        with Sustainability &amp; Innovation storylines.</p>
         <div class="grid grid--two" style="margin-top:1rem;">
           <div>
             <div class="metric-trend flat">
@@ -247,27 +248,49 @@
     <section class="card">
       <h2>Campaign Table</h2>
       <div class="scroll-section" style="max-height:320px;">
-        <div class="activity-item">
-          <div class="activity-meta">
-            <span>Summer Push · Twitter</span> <span>Spend $25K ·
-            Impressions 10M · Conversions 5K · Linked Narrative:
-            Sustainability</span>
-          </div><span class="pill pill--green">ROI 3.4x</span>
-        </div>
-        <div class="activity-item">
-          <div class="activity-meta">
-            <span>Autumn Refresh · Google</span> <span>Spend $45K ·
-            Impressions 12M · Conversions 6K · Narrative:
-            Innovation</span>
-          </div><span class="pill pill--amber">Optimize</span>
-        </div>
-        <div class="activity-item">
-          <div class="activity-meta">
-            <span>Winter Retention · Meta</span> <span>Spend $30K ·
-            Impressions 3M · Conversions 1K · Narrative: New
-            Product</span>
-          </div><span class="pill pill--red">Review</span>
-        </div>
+        <table class="data-table">
+          <caption>Campaign performance across channels</caption>
+          <thead>
+            <tr>
+              <th scope="col">Campaign</th>
+              <th scope="col">Channel</th>
+              <th scope="col">Spend</th>
+              <th scope="col">Impressions</th>
+              <th scope="col">Conversions</th>
+              <th scope="col">Narrative</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Summer Push</th>
+              <td>Twitter</td>
+              <td>$25K</td>
+              <td>10M</td>
+              <td>5K</td>
+              <td>Sustainability</td>
+              <td><span class="pill pill--green">ROI 3.4x</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Autumn Refresh</th>
+              <td>Google</td>
+              <td>$45K</td>
+              <td>12M</td>
+              <td>6K</td>
+              <td>Innovation</td>
+              <td><span class="pill pill--amber">Optimize</span></td>
+            </tr>
+            <tr>
+              <th scope="row">Winter Retention</th>
+              <td>Meta</td>
+              <td>$30K</td>
+              <td>3M</td>
+              <td>1K</td>
+              <td>New Product</td>
+              <td><span class="pill pill--red">Review</span></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
   </main>
@@ -277,23 +300,35 @@
   </footer>
   <script src=
   "https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"
-  defer></script> 
+  integrity="sha384-fXdIufVbE9aU7STmdk/DWK0imNOozId9fTwzM/gi0NfPjphEIC3gq0M760UnsKVy"
+  crossorigin="anonymous" defer></script> 
   <script src=
   "https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js" defer
-  ></script> 
+  integrity="sha384-DpVxUeeBWjUvUV1czyIHJAjh+jYUZFu2lLakbdua5vbwOrBGi1UgaKCHjTC+x3Ky"
+  crossorigin="anonymous"></script> 
   <script src=
   "https://cdn.jsdelivr.net/npm/dayjs@1.11.10/plugin/utc.min.js"
-  defer></script> 
+  defer
+  integrity="sha384-v5EASqtC8vOzJPfm3H3wUfq37w7G48AkP2p87r28TlXwgI9nNJpHt1pMHVx3cfnM"
+  crossorigin="anonymous"></script> 
   <script src=
   "https://cdn.jsdelivr.net/npm/dayjs@1.11.10/plugin/timezone.min.js"
-  defer></script> 
+  defer
+  integrity="sha384-cM2X/vROwLSI+k8Z152oNnWyenz5Nv2sgf4/7V+Yv23JiNvQ0KEttZfK3DvhyoWl"
+  crossorigin="anonymous"></script> 
   <script src=
   "https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"
-  defer></script> 
+  defer
+  integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+  crossorigin="anonymous"></script> 
   <script src=
   "https://cdn.jsdelivr.net/npm/tippy.js@6/dist/tippy-bundle.umd.min.js"
-  defer></script> 
-  <script src="https://cdn.jsdelivr.net/npm/d3@7" defer></script> 
+  defer
+  integrity="sha384-AiTRpehQ7zqeua0Ypfa6Q4ki/ddhczZxrKtiQbTQUlJIhBkTeyoZP9/W/5ulFt29"
+  crossorigin="anonymous"></script> 
+  <script src="https://cdn.jsdelivr.net/npm/d3@7" defer
+  integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i"
+  crossorigin="anonymous"></script> 
   <script src="mock-api.js" defer></script> 
   <script src="charts.js" defer></script> 
   <script src="app.js" defer></script>

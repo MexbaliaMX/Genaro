@@ -15,6 +15,12 @@
     --text-muted: #94a3b8;
     --border-subtle: rgba(148, 163, 184, 0.2);
     --glass-blur: blur(16px);
+    --layout-max-width: 1280px;
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 2.5rem;
     font-family: "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     color-scheme: dark;
 }
@@ -35,6 +41,19 @@ body[data-theme="light"] {
     --text-muted: #64748b;
     --border-subtle: rgba(51, 65, 85, 0.2);
     color-scheme: light;
+}
+
+/* Improve contrast for accessibility */
+body:not([data-theme="light"]) {
+    --text-primary-high-contrast: #f8fafc;
+    --text-secondary-high-contrast: #e2e8f0;
+    --text-muted-high-contrast: #cbd5e1;
+}
+
+body[data-theme="light"] {
+    --text-primary-high-contrast: #1e293b;
+    --text-secondary-high-contrast: #475569;
+    --text-muted-high-contrast: #64748b;
 }
 
 html {
@@ -65,6 +84,14 @@ a {
     text-decoration: none;
 }
 
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--accent-blue);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
 .page-shell {
     display: flex;
     flex-direction: column;
@@ -73,16 +100,21 @@ a {
 
 main {
     flex: 1;
-    padding: 2.5rem;
+    padding: var(--spacing-xl);
     display: flex;
     flex-direction: column;
-    gap: 2rem;
-    width: min(1600px, 100%);
+    gap: var(--spacing-lg);
+    width: min(var(--layout-max-width), 100%);
     margin: 0 auto;
+}
+
+body[data-layout="wide"] {
+    --layout-max-width: 100%;
 }
 
 body[data-layout="wide"] main {
     width: 100%;
+    margin: 0;
 }
 
 .skip-link {
@@ -106,7 +138,7 @@ body[data-layout="wide"] main {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.25rem 2.5rem;
+    padding: calc(var(--spacing-sm) * 1.25) var(--spacing-xl);
     background: rgba(15, 23, 42, 0.85);
     backdrop-filter: var(--glass-blur);
     border-bottom: 1px solid var(--border-subtle);
@@ -122,7 +154,7 @@ body[data-theme="light"] .top-bar {
 .brand {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: var(--spacing-sm);
 }
 
 .brand h1 {
@@ -202,7 +234,7 @@ body[data-theme="light"] .top-bar {
 .top-bar-actions {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: var(--spacing-md);
 }
 
 .theme-toggle {
@@ -433,7 +465,7 @@ body[data-theme="light"] .search-bar {
 
 .grid {
     display: grid;
-    gap: 1.5rem;
+    gap: var(--spacing-md);
 }
 
 .grid--two {
@@ -451,7 +483,7 @@ body[data-theme="light"] .search-bar {
 .layout--double-aside {
     display: grid;
     grid-template-columns: 360px 1fr 360px;
-    gap: 1.5rem;
+    gap: var(--spacing-md);
 }
 
 .layout--sidebar {
@@ -463,13 +495,13 @@ body[data-theme="light"] .search-bar {
 
 .flex {
     display: flex;
-    gap: 1rem;
+    gap: var(--spacing-sm);
 }
 
 .flex-column {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--spacing-sm);
 }
 
 .align-start {
@@ -537,14 +569,14 @@ body[data-theme="light"] .search-bar {
     min-height: calc(100vh - 160px);
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: var(--spacing-md);
 }
 
 .canvas-section {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: var(--spacing-md);
     scroll-margin-top: 140px;
 }
 
@@ -552,7 +584,7 @@ body[data-theme="light"] .search-bar {
     background: rgba(30, 41, 59, 0.65);
     border: 1px solid var(--border-subtle);
     border-radius: 20px;
-    padding: 1.75rem;
+    padding: calc(var(--spacing-md) * 1.17);
     position: relative;
     overflow: hidden;
 }
@@ -599,7 +631,7 @@ body[data-theme="light"] .card {
 .metric {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: var(--spacing-sm);
 }
 
 .metric-value {
@@ -752,7 +784,7 @@ body[data-theme="light"] .card {
 
 .legend {
     display: flex;
-    gap: 1rem;
+    gap: var(--spacing-sm);
     flex-wrap: wrap;
     margin-top: 1rem;
 }
@@ -891,7 +923,7 @@ body[data-theme="light"] .tag-cloud span {
 .scroll-section {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--spacing-sm);
     max-height: 350px;
     overflow-y: auto;
     padding-right: 1rem;
@@ -1457,7 +1489,7 @@ body[data-theme="light"] .tag-cloud span {
     .top-bar-actions {
         flex-wrap: wrap;
         width: 100%;
-        gap: 1rem;
+        gap: var(--spacing-sm);
     }
 
     .secondary-nav {
@@ -1490,7 +1522,7 @@ body[data-theme="light"] .tag-cloud span {
 @media (max-width: 960px) {
     .top-bar {
         flex-direction: column;
-        gap: 1.5rem;
+        gap: var(--spacing-md);
         align-items: flex-start;
     }
 

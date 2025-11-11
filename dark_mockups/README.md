@@ -35,9 +35,10 @@ dark_mockups/
 ### Configuring Mock Data Sources
 
 Each HTML shell declares the dataset it should display via `data-narrative-id` and
-`data-brand-id` attributes on the `<body>` element. Update those values to simulate a different
-narrative or brand without editing the JavaScript. `charts.js` reads the attributes automatically
-and falls back to `nar-global-ops` / `brand-genaro` when they are omitted.
+`data-brand-id` attributes on the `<body>` element. Dark mockups ship with the
+`nar-global-ops` / `brand-genaro` pair pre-seeded in `mock-api.js`; update that file to
+introduce additional narratives or brands before changing the attributes. When the attributes
+are omitted they fall back to the default pair automatically.
 
 ## Features
 
