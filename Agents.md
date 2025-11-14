@@ -27,6 +27,11 @@ Agent Families
 - Monitor response telemetry in real time to confirm alignment with predicted outcomes.  
 - Escalate deviations that exceed tolerances back to the orchestrator for replan.
 
+**Governance Agents**  
+- Ethical Guardian Agent audits recommendations for bias, compliance, and ethical drift, blocking execution until issues are resolved.  
+- Regulatory Watchdog Agent tracks legislative and platform policy updates, issuing directives that update fleet guardrails.  
+- Both agents maintain immutable audit trails and synchronize with the orchestrator control plane to enforce approvals.
+
 **Orchestrator**  
 - Coordinates task allocation, dependency resolution, and priority shifts.  
 - Applies business objectives and risk thresholds supplied by C-suite stakeholders.  

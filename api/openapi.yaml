@@ -1,0 +1,354 @@
+openapi: 3.1.0
+info:
+  title: Genaro DFT Integration API
+  version: 1.0.0
+  description: >
+    Contract-first REST API exposing key capabilities of the Genaro DFT 2.0 platform.
+    Covers ingestion webhooks, narrative analytics, search, metrics and orchestration endpoints.
+servers:
+  - url: https://api.genaro.dft/v1
+    description: Production
+  - url: https://sandbox-api.genaro.dft/v1
+    description: Sandbox
+tags:
+  - name: Ingestion
+    description: Secure entry points for partner webhooks and connectors.
+  - name: Narratives
+    description: Narrative intelligence and risk analytics.
+  - name: Search
+    description: Canonical search across artifacts, actors and narratives.
+  - name: Metrics
+    description: KPI aggregation windows for dashboards.
+  - name: Orchestration
+    description: Actions to test alerts, exports and orchestrator workflows.
+components:
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://auth.genaro.dft/oauth2/token
+          scopes:
+            ingest: Submit ingestion payloads.
+            narratives.read: Read narrative analytics.
+            search.read: Search artifacts and narratives.
+            metrics.read: Read KPI metrics.
+            orchestration.write: Trigger orchestration actions.
+    ApiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    WebhookSignature:
+      type: object
+      properties:
+        signature:
+          type: string
+          description: Hex-encoded HMAC signature.
+        timestamp:
+          type: string
+          format: date-time
+    IngestWebhookPayload:
+      type: object
+      required:
+        - source
+        - external_id
+        - fetched_at
+        - payload
+      properties:
+        source:
+          type: string
+          example: tiktok
+        external_id:
+          type: string
+        fetched_at:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          additionalProperties: true
+    NarrativeMetric:
+      type: object
+      required:
+        - kpi
+        - value
+        - window
+      properties:
+        kpi:
+          type: string
+          example: sentiment_index
+        value:
+          type: number
+          format: double
+        window:
+          type: string
+          example: 7d
+        breakdown:
+          type: object
+          additionalProperties:
+            type: number
+    NarrativeMetricsResponse:
+      type: object
+      required:
+        - narrative_id
+        - metrics
+      properties:
+        narrative_id:
+          type: string
+        window:
+          type: string
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/NarrativeMetric'
+    SearchResult:
+      type: object
+      properties:
+        artifact:
+          type: object
+          properties:
+            id:
+              type: string
+            type:
+              type: string
+            text:
+              type: string
+            lang:
+              type: string
+            created_at:
+              type: string
+              format: date-time
+        narrative:
+          type: object
+          properties:
+            id:
+              type: string
+            title:
+              type: string
+            risk_level:
+              type: string
+        score:
+          type: number
+          format: double
+    SearchResponse:
+      type: object
+      properties:
+        query:
+          type: string
+        total:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchResult'
+    AlertTestRequest:
+      type: object
+      required:
+        - rule_id
+        - payload
+      properties:
+        rule_id:
+          type: string
+        payload:
+          type: object
+          additionalProperties: true
+    AlertTestResponse:
+      type: object
+      properties:
+        triggered:
+          type: boolean
+        outputs:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    ExportJobRequest:
+      type: object
+      required:
+        - destination
+        - filters
+      properties:
+        destination:
+          type: string
+          description: Target system identifier (e.g., sac, powerbi).
+        filters:
+          type: object
+          additionalProperties: true
+    ExportJobResponse:
+      type: object
+      properties:
+        job_id:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, completed, failed]
+        download_url:
+          type: string
+          format: uri
+          nullable: true
+security:
+  - OAuth2:
+      - narratives.read
+paths:
+  /ingest/webhook/{source}:
+    post:
+      summary: Receive signed webhook payload and push to ingestion bus
+      tags: [Ingestion]
+      security:
+        - ApiKey: []
+      parameters:
+        - name: source
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestWebhookPayload'
+        description: Raw payload from external source. Signature must be validated upstream.
+      responses:
+        '202':
+          description: Accepted for processing
+        '400':
+          description: Invalid payload
+        '401':
+          description: Invalid signature or key
+  /narratives/{id}/metrics:
+    get:
+      summary: Retrieve KPI metrics for a narrative
+      tags: [Narratives]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: window
+          schema:
+            type: string
+            enum: [1h,24h,7d,30d]
+            default: 7d
+        - in: query
+          name: breakdown
+          schema:
+            type: string
+            enum: [platform, geography, actor_type]
+      responses:
+        '200':
+          description: Narrative metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NarrativeMetricsResponse'
+        '404':
+          description: Narrative not found
+  /search:
+    get:
+      summary: Search artifacts and narratives with canonical query language
+      tags: [Search]
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: since
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: until
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+            minimum: 10
+            maximum: 200
+            default: 25
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+  /metrics/kpis:
+    get:
+      summary: Aggregated KPIs across narratives or brands
+      tags: [Metrics]
+      parameters:
+        - in: query
+          name: entity_id
+          schema:
+            type: string
+        - in: query
+          name: entity_type
+          schema:
+            type: string
+            enum: [narrative, brand]
+            default: narrative
+        - in: query
+          name: window
+          schema:
+            type: string
+            enum: [1h,24h,7d,30d]
+            default: 24h
+      responses:
+        '200':
+          description: KPI collection
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NarrativeMetric'
+  /alerts/test:
+    post:
+      summary: Test an alert rule with a hypothetical payload
+      tags: [Orchestration]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertTestRequest'
+      responses:
+        '200':
+          description: Test result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertTestResponse'
+        '404':
+          description: Rule not found
+  /exports/sac:
+    post:
+      summary: Trigger export job to SAP Analytics Cloud
+      tags: [Orchestration]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportJobRequest'
+      responses:
+        '202':
+          description: Job queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportJobResponse'

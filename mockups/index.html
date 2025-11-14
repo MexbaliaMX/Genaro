@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genaro — Unified Command Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="dashboard">
+    <a href="#main" class="visually-hidden visually-hidden-focusable">Skip to main content</a>
+    <header class="d-flex justify-content-between align-items-center p-3 bg-light">
+        <div class="logo">Genaro DFT 2.0</div>
+        <div class="d-flex align-items-center">
+            <select class="form-select me-3">
+                <option selected>Last 24 hours</option>
+                <option>Last 7 days</option>
+                <option>Last 30 days</option>
+            </select>
+            <button type="button" class="btn btn-link p-0 notifications me-3" aria-label="Open notifications">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bell" viewBox="0 0 16 16">
+                    <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4.5 6H4a2 2 0 0 0-2 2v1.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V8a2 2 0 0 0-2-2h-.5a4.002 4.002 0 0 0-2.703-3.921L8 1.918zM14.22 12c.223.447.176.99-.125 1.385C13.69 13.998 13.19 14 12.5 14H3.5c-.69 0-1.19-.002-1.595-.615-.299-.395-.348-.938-.125-1.385C1.98 11.237 2.5 10.5 3.5 10.5h9c1 0 1.52.737 1.72 1.5z"/>
+                </svg>
+            </button>
+            <div class="user-avatar">
+                <img src="https://via.placeholder.com/40" alt="User Avatar" class="rounded-circle">
+            </div>
+        </div>
+    </header>
+    <nav class="mock-nav" aria-label="Primary navigation">
+        <a href="index.html" data-nav="dashboard">Dashboard</a>
+        <a href="narrative-tracker.html" data-nav="narrative">Narrative Tracker</a>
+        <a href="risk-integrity.html" data-nav="risk">Risk & Integrity</a>
+        <a href="sandbox-studio.html" data-nav="sandbox">Sandbox</a>
+        <a href="executive-briefing.html" data-nav="briefing">Briefings</a>
+        <a href="advertising-dashboard.html" data-nav="advertising">Advertising</a>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <main id="main" class="col-md-12 ms-sm-auto col-lg-12 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Unified Command Dashboard</h1>
+                    <div class="d-flex align-items-center">
+                        <input type="search" class="form-control me-2" placeholder="Ask Genaro to simulate, brief, or execute…">
+                        <button class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-4">
+                        <div class="card kpi-card text-white bg-primary">
+                            <div class="card-header">Emerging Narratives</div>
+                            <div class="card-body">
+                                <h5 class="card-title">12</h5>
+                                <p class="card-text mb-1">Detected in the last 24 hours.</p>
+                                <small class="text-white-50">Clusters: Climate, Supply Chain, Governance</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card kpi-card text-white bg-danger">
+                            <div class="card-header">Active Critical Risks</div>
+                            <div class="card-body">
+                                <h5 class="card-title">3</h5>
+                                <p class="card-text mb-1">Deepfake, Coordinated Bot Activity, Sentiment Crash.</p>
+                                <small class="text-white-50">All escalated to HITL queue.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card kpi-card text-white bg-warning">
+                            <div class="card-header">72h Forecasts</div>
+                            <div class="card-body">
+                                <h5 class="card-title">5</h5>
+                                <p class="card-text mb-1">Narratives likely to escalate.</p>
+                                <small class="text-white-50">Next review: 3 hours.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-lg-9">
+                        <h2 class="mb-3">Narrative Heatmap</h2>
+                        <div class="placeholder-block heatmap-placeholder">
+                            <svg viewBox="0 0 160 120" role="img" aria-labelledby="heatmapTitle">
+                                <title id="heatmapTitle">Narrative intensity heatmap</title>
+                                <defs>
+                                    <linearGradient id="heatGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#22c55e"/>
+                                        <stop offset="50%" stop-color="#facc15"/>
+                                        <stop offset="100%" stop-color="#ef4444"/>
+                                    </linearGradient>
+                                </defs>
+                                <rect x="0" y="0" width="160" height="120" rx="12" ry="12" fill="#f8fafc"/>
+                                <g transform="translate(20,20)">
+                                    <rect x="0" y="0" width="30" height="30" rx="6" fill="#bae6fd" data-tooltip="Cluster: Sustainability | Engagement: Medium" tabindex="0"/>
+                                    <rect x="40" y="0" width="30" height="30" rx="6" fill="#fcd34d" data-tooltip="Cluster: Governance | Engagement: High" tabindex="0"/>
+                                    <rect x="80" y="0" width="30" height="30" rx="6" fill="#f97316" data-tooltip="Cluster: Supply Chain | Risk: Elevated" tabindex="0"/>
+                                    <rect x="0" y="40" width="30" height="30" rx="6" fill="#34d399" data-tooltip="Cluster: Investor Updates | Sentiment: Positive" tabindex="0"/>
+                                    <rect x="40" y="40" width="30" height="30" rx="6" fill="#fcd34d" data-tooltip="Cluster: Policy Debate | Sentiment: Neutral" tabindex="0"/>
+                                    <rect x="80" y="40" width="30" height="30" rx="6" fill="#ef4444" data-tooltip="Cluster: Crisis Response | Risk: Critical" tabindex="0"/>
+                                    <rect x="0" y="80" width="30" height="30" rx="6" fill="#bbf7d0" data-tooltip="Cluster: Product Launch | Performance: Stable" tabindex="0"/>
+                                    <rect x="40" y="80" width="30" height="30" rx="6" fill="#fde68a" data-tooltip="Cluster: ESG | Engagement: Emerging" tabindex="0"/>
+                                    <rect x="80" y="80" width="30" height="30" rx="6" fill="#fb7185" data-tooltip="Cluster: Competitor Moves | Volatility: Rising" tabindex="0"/>
+                                    <rect x="120" y="20" width="12" height="60" rx="6" fill="url(#heatGradient)"/>
+                                </g>
+                                <text x="130" y="96" font-size="8" fill="#64748b" text-anchor="middle">Low</text>
+                                <text x="130" y="28" font-size="8" fill="#64748b" text-anchor="middle">High</text>
+                            </svg>
+                            <span class="visually-hidden">Heatmap of narrative clusters by risk level</span>
+                        </div>
+                        <p class="placeholder-caption text-center">Narrative Intensity Heatmap</p>
+                    </div>
+                    <div class="col-lg-3">
+                        <h2 class="mb-3">Top Narratives</h2>
+                        <div class="list-group">
+                            <a href="narrative-tracker.html" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">New Climate Policy Debate</h5>
+                                    <small class="text-success">Virality 68%</small>
+                                </div>
+                                <p class="mb-1">Sentiment: 60% Positive, 30% Negative, 10% Neutral</p>
+                                <small>Regions: North America, Europe</small>
+                            </a>
+                            <a href="narrative-tracker.html" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">CEO's Statement Blowback</h5>
+                                    <small class="text-danger">Virality 82%</small>
+                                </div>
+                                <p class="mb-1">Sentiment: 15% Positive, 75% Negative, 10% Neutral</p>
+                                <small>Regions: LATAM, EMEA</small>
+                            </a>
+                            <a href="narrative-tracker.html" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">Q3 Earnings Resilience</h5>
+                                    <small class="text-warning">Virality 54%</small>
+                                </div>
+                                <p class="mb-1">Sentiment: 55% Positive, 20% Negative, 25% Neutral</p>
+                                <small>Regions: North America</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4 g-3">
+                    <div class="col-lg-6">
+                        <h2>Scenario Timeline (72h)</h2>
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body">
+                                <ul class="summary-list list-unstyled mb-0">
+                                    <li><strong>+3h:</strong> Activate investor briefing draft for “New fiscal policy”.</li>
+                                    <li><strong>+12h:</strong> Sandbox re-run for regulation narrative counter-message.</li>
+                                    <li><strong>+24h:</strong> Board approval required for paid media escalation.</li>
+                                    <li><strong>+48h:</strong> Legal review checkpoint on AI disclosure policy.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <h2>Approvals Queue</h2>
+                        <div class="card shadow-sm border-0">
+                            <div class="card-body">
+                                <ul class="summary-list list-unstyled mb-0">
+                                    <li><strong>Legal:</strong> Crisis press release variant B <span class="badge bg-warning text-dark">Due 1h</span></li>
+                                    <li><strong>Ethics:</strong> Sandbox scenario #447 checklist <span class="badge bg-info text-dark">In review</span></li>
+                                    <li><strong>CFO:</strong> Budget shift request – Innovation narrative <span class="badge bg-primary">Ready</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <h2>AI Insights</h2>
+                        <div class="card insight-card">
+                            <div class="card-body">
+                                <p>"Genaro anticipa un repunte de sentimiento positivo si se despliega la variante C con refuerzo en LATAM."</p>
+                                <p>"El riesgo reputacional del deepfake cae al 0.23 si los testimonios verificados se publican en <strong>menos de 6h</strong>."</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="d-flex flex-wrap justify-content-center justify-content-md-between align-items-center p-3 mt-4 bg-light rounded-3 quick-links" aria-label="Secondary navigation">
+                    <a href="narrative-tracker.html" class="btn btn-outline-secondary" data-quick-link>Narrative Tracker</a>
+                    <a href="risk-integrity.html" class="btn btn-outline-secondary" data-quick-link>Risk & Integrity</a>
+                    <a href="sandbox-studio.html" class="btn btn-outline-secondary" data-quick-link>Sandbox Studio</a>
+                    <a href="executive-briefing.html" class="btn btn-outline-secondary" data-quick-link>Briefings</a>
+                    <a href="advertising-dashboard.html" class="btn btn-outline-secondary" data-quick-link>Advertising</a>
+                </footer>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

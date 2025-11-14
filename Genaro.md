@@ -15,8 +15,13 @@ Perception Agents: análisis multimodal (texto, imagen, audio, video) con detecc
 Analytics Agents: correlación entre datos financieros, reputacionales y narrativos.
 Content Agents: generación de mensajes estratégicos (desde comunicados de prensa hasta microcontenido social).
 Action Agents: ejecución automatizada en plataformas externas (anuncios, redes sociales, canales de servicio).
-Ethical Guardian Agent: audita de forma continua las acciones y recomendaciones de la flota para garantizar el alineamiento con marcos éticos y de cumplimiento, reduciendo el riesgo de errores reputacionales por parte de la IA.
-Regulatory Watchdog Agent: monitorea proactivamente cambios en legislaciones y normativas relevantes, actualizando automáticamente las barreras de cumplimiento para los agentes de Contenido y Acción.
+Ethical Guardian Agent: audita de forma continua las acciones y recomendaciones de la flota  
+para garantizar el alineamiento con marcos éticos y de cumplimiento.  
+Reduce el riesgo de errores reputacionales por parte de la IA.  
+Detalle operativo en [agents/orchestrator/ethical-guardian-agent.md](agents/orchestrator/ethical-guardian-agent.md).
+Regulatory Watchdog Agent: monitorea proactivamente cambios en legislaciones y normativas relevantes  
+para actualizar las barreras de cumplimiento de los agentes de Contenido y Acción.  
+Más detalles en [agents/orchestrator/regulatory-watchdog-agent.md](agents/orchestrator/regulatory-watchdog-agent.md).
 Orchestrator: el “conductor” que coordina la flota de agentes según los objetivos estratégicos definidos por el usuario.
 3. Digital Sandbox Studio
 Un entorno simulado donde se pueden probar estrategias antes de aplicarlas:

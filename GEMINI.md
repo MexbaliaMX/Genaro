@@ -13,11 +13,11 @@ Genaro DFT 2.0 is a predictive, prescriptive, and agentic platform that transfor
 
 ### 2.1. Agnostic Intelligence Core
 
-Genaro integrates diverse sources (social media, news, CRM, financial feeds, video transcripts) into a model-agnostic and scalable architecture. This core allows selecting the best AI model for each task and ensures future resilience.
+Genaro integrates diverse sources (social media, news, CRM, financial feeds, video transcripts, **advertising platforms**) into a model-agnostic and scalable architecture. This core allows selecting the best AI model for each task and ensures future resilience.
 
 ### 2.2. Specialized Agentic Fleet
 
-A coordinated fleet of specialized agents transforms signals into strategic action. The fleet is model-agnostic, orchestrated via HITL-governed policies, and aligned with the platform's predictive, prescriptive, and execution mandates.
+A coordinated fleet of specialized agents transforms signals into strategic action, **including the analysis and optimization of advertising spend and performance**. The fleet is model-agnostic, orchestrated via HITL-governed policies, and aligned with the platform's predictive, prescriptive, and execution mandates.
 
 #### 2.2.1. Perception Agents (Perception Signal Harvester)
 
@@ -83,6 +83,7 @@ An integral panel for:
 | Digital Sandbox Studio | Simulation workspace for testing messaging and campaign strategies before deployment. | Marketing Strategists, IR Analysts | Scenario cloning, generative outcome projections, A/B strategy comparisons, competitor countermeasure modeling. |
 | Agent Orchestrator Console | Control surface for assigning agent tasks, tuning guardrails, and tracking HITL checkpoints. | Operations Leads, AI Governance Teams | Agent status monitoring, policy management, escalation routing, audit trail exports. |
 | Financial Extensions Panel | Module aligning advertising spend with reputational and revenue impact metrics. | CFOs, CMOs, Performance Marketing Teams | Ads ROI tracking, budget-to-narrative attribution, funnel conversion analytics, integrated financial reporting. |
+| Advertising Dashboard | Consolidated view of ad spend, performance metrics, and narrative impact correlation. | Performance Marketing Leads, CMOs | Real-time ad spend tracking, campaign performance analysis, narrative ROI insights, budget optimization recommendations. |
 | Risk & ESG Monitor | Focused dashboard for socio-environmental controversy surveillance and compliance readiness. | Risk Managers, ESG Officers | Incident alerts, license-to-operate indicators, regulatory reporting templates, mitigation playbooks. |
 | Campaign Control Center | Rapid-response interface for political/government engagements with segmented outreach tools. | Political Strategists, Government Affairs | Electorate sentiment heatmaps, debate scenario rehearsals, real-time message generation, constituency analytics. |
 

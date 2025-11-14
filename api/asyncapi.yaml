@@ -1,0 +1,183 @@
+asyncapi: 2.6.0
+info:
+  title: Genaro DFT Event Fabric
+  version: 1.0.0
+  description: Canonical event streams for ingestion, normalization, signals, risk detection and alerts.
+defaultContentType: application/json
+servers:
+  production:
+    url: kafka+ssl://kafka1.genaro.dft:9093
+    protocol: kafka-secure
+    description: Production Kafka Cluster
+channels:
+  raw.content.ingested:
+    description: Raw content ingested from external connectors.
+    subscribe:
+      summary: Receive new raw content payloads
+      message:
+        name: RawContentIngested
+        title: Raw Content Ingested
+        payload:
+          type: object
+          required:
+            - source
+            - external_id
+            - fetched_at
+            - payload
+          properties:
+            source:
+              type: string
+            external_id:
+              type: string
+            fetched_at:
+              type: string
+              format: date-time
+            payload:
+              type: object
+              additionalProperties: true
+  canon.content.normalized:
+    description: Artifacts normalised into the DFT Canonical Model.
+    subscribe:
+      summary: Receive normalized artifacts for downstream enrichment & scoring.
+      message:
+        name: CanonContentNormalized
+        title: Canonical Content Normalized
+        payload:
+          type: object
+          required:
+            - artifact
+            - channel
+          properties:
+            artifact:
+              type: object
+              required:
+                - id
+                - type
+                - created_at
+              properties:
+                id:
+                  type: string
+                type:
+                  type: string
+                  enum: [text, image, video, audio]
+                text:
+                  type: string
+                  nullable: true
+                media:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                        format: uri
+                      kind:
+                        type: string
+                lang:
+                  type: string
+                created_at:
+                  type: string
+                  format: date-time
+                actor_id:
+                  type: string
+            channel:
+              type: object
+              properties:
+                platform:
+                  type: string
+                topic:
+                  type: string
+            metadata:
+              type: object
+              additionalProperties: true
+  signal.sentiment.scored:
+    description: Signals produced by ML models (sentiment, toxicity, stance).
+    subscribe:
+      summary: Consume score outputs for feature store updates.
+      message:
+        name: SignalSentimentScored
+        payload:
+          type: object
+          required:
+            - artifact_id
+            - signals
+          properties:
+            artifact_id:
+              type: string
+            signals:
+              type: object
+              properties:
+                sentiment:
+                  type: object
+                  properties:
+                    value:
+                      type: number
+                      format: float
+                    confidence:
+                      type: number
+                      format: float
+                    model:
+                      type: string
+                toxicity:
+                  type: object
+                  properties:
+                    value:
+                      type: number
+                      format: float
+  risk.narrative.detected:
+    description: Narrative risk detection events.
+    subscribe:
+      summary: Receive new risk detections for orchestration and escalation.
+      message:
+        name: NarrativeRiskDetected
+        payload:
+          type: object
+          required:
+            - narrative_id
+            - risk_level
+          properties:
+            narrative_id:
+              type: string
+            risk_level:
+              type: string
+              enum: [low, moderate, high, critical]
+            explanation:
+              type: string
+            evidence:
+              type: array
+              items:
+                type: object
+                properties:
+                  artifact_id:
+                    type: string
+                  score:
+                    type: number
+                  url:
+                    type: string
+                    format: uri
+                  snippet:
+                    type: string
+components:
+  messages:
+    AlertThresholdBreached:
+      payload:
+        type: object
+        required:
+          - rule_id
+          - triggered_at
+        properties:
+          rule_id:
+            type: string
+          triggered_at:
+            type: string
+            format: date-time
+          severity:
+            type: string
+            enum: [warning, critical]
+          context:
+            type: object
+            additionalProperties: true
+  securitySchemes:
+    SASLPlain:
+      type: userPassword
+      description: SASL/PLAIN credentials supplied via `${KAFKA_USERNAME}` and `${KAFKA_PASSWORD}`.

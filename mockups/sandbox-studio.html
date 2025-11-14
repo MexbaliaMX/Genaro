@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genaro — Sandbox Studio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="sandbox">
+    <a href="#main" class="visually-hidden visually-hidden-focusable">Skip to main content</a>
+    <header class="d-flex justify-content-between align-items-center p-3 bg-light">
+        <div class="logo">Genaro DFT 2.0</div>
+        <div class="d-flex align-items-center">
+            <button type="button" class="btn btn-link p-0 notifications me-3" aria-label="Open notifications">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bell" viewBox="0 0 16 16">
+                    <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4.5 6H4a2 2 0 0 0-2 2v1.5a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V8a2 2 0 0 0-2-2h-.5a4.002 4.002 0 0 0-2.703-3.921L8 1.918zM14.22 12c.223.447.176.99-.125 1.385C13.69 13.998 13.19 14 12.5 14H3.5c-.69 0-1.19-.002-1.595-.615-.299-.395-.348-.938-.125-1.385C1.98 11.237 2.5 10.5 3.5 10.5h9c1 0 1.52.737 1.72 1.5z"/>
+                </svg>
+            </button>
+            <div class="user-avatar">
+                <img src="https://via.placeholder.com/40" alt="User Avatar" class="rounded-circle">
+            </div>
+        </div>
+    </header>
+    <nav class="mock-nav" aria-label="Primary navigation">
+        <a href="index.html" data-nav="dashboard">Dashboard</a>
+        <a href="narrative-tracker.html" data-nav="narrative">Narrative Tracker</a>
+        <a href="risk-integrity.html" data-nav="risk">Risk & Integrity</a>
+        <a href="sandbox-studio.html" data-nav="sandbox">Sandbox</a>
+        <a href="executive-briefing.html" data-nav="briefing">Briefings</a>
+        <a href="advertising-dashboard.html" data-nav="advertising">Advertising</a>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <main id="main" class="col-md-12 ms-sm-auto col-lg-12 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Sandbox Studio: Simulation Strategies</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <select class="form-select me-2">
+                            <option selected>Target Narrative: #EnvironmentalCrisis</option>
+                            <option>New Fiscal Policy</option>
+                            <option>CEO's Recent Statement</option>
+                        </select>
+                        <button type="button" class="btn btn-primary">Clonar escenario actual</button>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-3">
+                        <h2>Audience Cohorts</h2>
+                        <div class="list-group mb-3">
+                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                Clientes Premium
+                                <span class="badge bg-primary">32%</span>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                Reguladores
+                                <span class="badge bg-warning text-dark">18%</span>
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                Urban Young Adults
+                                <span class="badge bg-success">26%</span>
+                            </a>
+                        </div>
+                        <button class="btn btn-outline-secondary w-100">Add Cohort</button>
+                        <div class="card insight-card mt-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Context Notes</h6>
+                                <p class="card-text">Genaro recommends highlighting verifiable metrics for regulators and authentic testimonials for premium clients.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <h2>Message Editor</h2>
+                        <ul class="nav nav-tabs" id="messageTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="variantA-tab" data-bs-toggle="tab" data-bs-target="#variantA" type="button" role="tab" aria-controls="variantA" aria-selected="true">Variant A (Tweet)</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="variantB-tab" data-bs-toggle="tab" data-bs-target="#variantB" type="button" role="tab" aria-controls="variantB" aria-selected="false">Variant B (Press Release)</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="variantC-tab" data-bs-toggle="tab" data-bs-target="#variantC" type="button" role="tab" aria-controls="variantC" aria-selected="false">Variant C (Short Video)</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content p-3 border border-top-0 rounded-bottom bg-white shadow-sm">
+                            <div class="tab-pane fade show active" id="variantA" role="tabpanel" aria-labelledby="variantA-tab">
+                                <label class="form-label fw-semibold">Mensaje</label>
+                                <textarea class="form-control" rows="5">Our commitment to the environment is non-negotiable. #Sustainability #FutureReady</textarea>
+                                <div class="d-flex justify-content-end">
+                                    <button class="btn btn-success mt-2">Simulate Variant A</button>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="variantB" role="tabpanel" aria-labelledby="variantB-tab">
+                                <label class="form-label fw-semibold">Mensaje</label>
+                                <textarea class="form-control" rows="5">Official statement: Company X reaffirms its commitment to sustainable practices and environmental stewardship...</textarea>
+                                <div class="d-flex justify-content-end">
+                                    <button class="btn btn-success mt-2">Simulate Variant B</button>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="variantC" role="tabpanel" aria-labelledby="variantC-tab">
+                                <label class="form-label fw-semibold">Storyboard / Script</label>
+                                <textarea class="form-control" rows="4">Scene 1: Team at renewable facility. Narrator highlights investment in clean energy...</textarea>
+                                <label class="form-label fw-semibold mt-3">Short video URL</label>
+                                <input type="text" class="form-control" placeholder="https://cdn.genaro.ai/assets/short.mp4">
+                                <div class="d-flex justify-content-end">
+                                    <button class="btn btn-success mt-2">Simulate Variant C</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3">
+                        <h2>Projected Outcomes</h2>
+                        <div class="card insight-card mb-3">
+                            <div class="card-header bg-transparent fw-semibold">Variant A (Tweet)</div>
+                            <div class="card-body">
+                                <p class="card-text">Sentiment Change: <span class="text-success fw-semibold">+15%</span></p>
+                                <p class="card-text">Share of Voice: <span class="text-info fw-semibold">+5%</span></p>
+                                <p class="card-text">Virality Probability: <span class="text-warning fw-semibold">Low</span></p>
+                                <p class="card-text">Ethical Risk: <span class="text-success fw-semibold">Low</span></p>
+                            </div>
+                        </div>
+                        <div class="card insight-card mb-3">
+                            <div class="card-header bg-transparent fw-semibold">Effectiveness Comparison</div>
+                            <div class="placeholder-block chart-placeholder" style="height: 180px;">
+                                <svg viewBox="0 0 180 120" role="img" aria-labelledby="comparisonTitle">
+                                    <title id="comparisonTitle">Effectiveness comparison by variant</title>
+                                    <rect x="0" y="0" width="180" height="120" rx="12" ry="12" fill="#f8fafc"/>
+                                <rect x="30" y="70" width="24" height="30" fill="#22c55e" rx="4" data-tooltip="Variante A: +15% sentimiento esperado" tabindex="0"/>
+                                <rect x="78" y="40" width="24" height="60" fill="#0ea5e9" rx="4" data-tooltip="Variante B: +22% sentimiento, mayor reach" tabindex="0"/>
+                                <rect x="126" y="55" width="24" height="45" fill="#f97316" rx="4" data-tooltip="Variante C: +11% sentimiento, baja viralidad" tabindex="0"/>
+                                    <text x="42" y="110" font-size="9" text-anchor="middle" fill="#475569">A</text>
+                                    <text x="90" y="110" font-size="9" text-anchor="middle" fill="#475569">B</text>
+                                    <text x="138" y="110" font-size="9" text-anchor="middle" fill="#475569">C</text>
+                                </svg>
+                                <span class="visually-hidden">Bar chart showing variant B highest expected lift</span>
+                            </div>
+                            <p class="placeholder-caption text-center">Projected Lift per Variant</p>
+                        </div>
+                        <h2>Ethics Checklist</h2>
+                        <ul class="list-group">
+                            <li class="list-group-item list-group-item-success d-flex justify-content-between align-items-center">
+                                Contains fear-based manipulation?
+                                <span class="badge bg-success">NO</span>
+                            </li>
+                            <li class="list-group-item list-group-item-success d-flex justify-content-between align-items-center">
+                                Respects sensitive data policies?
+                                <span class="badge bg-success">YES</span>
+                            </li>
+                            <li class="list-group-item list-group-item-success d-flex justify-content-between align-items-center">
+                                Complies with GDPR/CCPA?
+                                <span class="badge bg-success">YES</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

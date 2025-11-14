@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for HTML5 for Linux version 5.8.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content=
+  "width=device-width, initial-scale=1.0">
+  <title>Genaro — Unified Command Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="dashboard" class="page-shell">
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="top-bar">
+    <div class="brand">
+      <div>
+        <h1>Genaro DFT 2.0</h1><span class="status-pill">Active
+        Monitoring</span>
+      </div><button class="tour-trigger" data-tour-trigger="">▸
+      Guided Tour</button>
+    </div>
+    <div class="top-bar-actions">
+      <div class="search-bar">
+        <svg width="16" height="16" fill="currentColor"
+        aria-hidden="true" viewBox="0 0 16 16">
+        <path d=
+        "M11 6a5 5 0 1 1-1-3.874L10.414 3l.293-.293A1 1 0 0 1 12.414 4l-.293.293L12 4.586l.293.293A1 1 0 0 1 12.414 6l-.293.293L12 6.586l-1.293 1.293A5 5 0 0 1 11 6Z">
+        </path></svg> <input type="search" placeholder=
+        "Ask Genaro to simulate, brief, or execute…" aria-label=
+        "Global command search">
+      </div>
+      <nav class="secondary-nav" aria-label="Primary navigation">
+        <a href="index.html" data-nav="dashboard">Dashboard</a>
+        <a href="narrative-tracker.html" data-nav=
+        "narrative">Narrative Tracker</a> <a href=
+        "risk-integrity.html" data-nav="risk">Risk & Integrity</a>
+        <a href="sandbox-studio.html" data-nav="sandbox">Sandbox
+        Studio</a> <a href="executive-briefing.html" data-nav=
+        "briefing">Executive Briefing</a> <a href=
+        "advertising-dashboard.html" data-nav=
+        "advertising">Advertising Dashboard</a>
+      </nav>
+      <div class="status-pill status-pill--warning">
+        Threat Level: Elevated
+      </div>
+    </div>
+  </header>
+  <main id="main">
+    <section class="grid grid--three">
+      <div class="card" data-tour="threat-index">
+        <h2>Global Threat Index</h2>
+        <div class="flex">
+          <div class="gauge">
+            <div class="gauge-value">
+              <span class="value">67</span> <span class=
+              "pill pill--amber">Elevated</span>
+            </div>
+          </div>
+          <div class="flex-column" style="flex:1;">
+            <div class="metric">
+              <div>
+                <div class="metric-value">
+                  +12 pts
+                </div>
+                <div class="metric-trend up">
+                  <span>vs. last 7 days</span>
+                </div>
+              </div>
+            </div>
+            <p class="metric-trend flat">Industry Benchmark: 45</p>
+            <div class="gauge-labels">
+              <span>Low</span> <span>Medium</span>
+              <span>Critical</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Narratives Monitored</h2>
+        <div class="metric">
+          <div>
+            <div class="metric-value">
+              23,847
+            </div>
+            <div class="metric-trend up">
+              ▲ 4.3%
+            </div>
+            <p class="metric-trend flat">Active Operations: 18</p>
+          </div>
+          <div class="sparkline">
+            Activity Sparkline
+          </div>
+        </div>
+        <div class="legend">
+          <div class="legend-item">
+            <span class="legend-dot" style=
+            "background:var(--accent-blue);" aria-hidden=
+            "true">&nbsp;</span>Emerging
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot" style=
+            "background:var(--accent-amber);" aria-hidden=
+            "true">&nbsp;</span>Volatile
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot" style=
+            "background:var(--accent-red);" aria-hidden=
+            "true">&nbsp;</span>Critical
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Critical Alerts</h2>
+        <div class="scroll-section">
+          <article class="alert-item critical">
+            <span class="badge badge--critical">Critical</span>
+            <div>
+              <h3>Deepfake Video Detected — CEO Target</h3>
+              <p>Flagged on YouTube & TikTok | 94% synthetic
+              probability</p>
+            </div><span class="metric-trend flat">12m ago</span>
+          </article>
+          <article class="alert-item">
+            <span class="badge badge--warning">High</span>
+            <div>
+              <h3>Coordinated Bot Activity — Finance Sector</h3>
+              <p>Bot cluster in LATAM | 2.7x amplification
+              velocity</p>
+            </div><span class="metric-trend flat">32m ago</span>
+          </article>
+          <article class="alert-item">
+            <span class="badge badge--warning">High</span>
+            <div>
+              <h3>Disinformation Campaign — Election Narrative</h3>
+              <p>Trending in EU | 5 key influence nodes
+              identified</p>
+            </div><span class="metric-trend flat">51m ago</span>
+          </article>
+        </div>
+      </div>
+    </section>
+    <section class="grid" style=
+    "grid-template-columns: 2.2fr 1fr;">
+      <div class="flex-column" style="gap:1.5rem;">
+        <div class="card" data-tour="heatmap">
+          <h2 id="dashboard-globe-title">Global Narrative
+          Current</h2>
+          <div class="three-surface" id="dashboard-globe" role=
+          "img" aria-labelledby="dashboard-globe-title"
+          aria-describedby="dashboard-globe-fallback">
+            <div class="fallback-message" id="dashboard-globe-fallback"
+            data-globe-fallback="" hidden role="status"
+            aria-live="polite">
+              WebGL not available — showing curated insight summary
+              instead.
+            </div>
+          </div>
+        </div>
+        <div class="card" style="min-height:360px;">
+          <h2>Narrative Activity — Heatmap</h2>
+          <div class="chart-surface" id="dashboard-heatmap" role=
+          "img" aria-label="Narrative activity heatmap"></div>
+          <div class="legend">
+            <div class="legend-item">
+              <span class="legend-dot" style="background:#38bdf8;"
+              aria-hidden="true">&nbsp;</span>Low Activity
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot" style="background:#f97316;"
+              aria-hidden="true">&nbsp;</span>Medium
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot" style="background:#ef4444;"
+              aria-hidden="true">&nbsp;</span>High
+            </div>
+          </div>
+        </div>
+      </div>
+      <aside class="card" data-tour="activity">
+        <h2>Real-time Activity Feed</h2>
+        <div class="scroll-section">
+          <div class="activity-item">
+            <div class="activity-meta">
+              <span>Sentiment inversion detected —
+              #SupplyChain</span> <span>Triggered by coordinated
+              post network (45 nodes)</span>
+            </div><span class="pill pill--amber">Under
+            Review</span>
+          </div>
+          <div class="activity-item">
+            <div class="activity-meta">
+              <span>Sandbox Scenario Completed — Pharma
+              Recalls</span> <span>Variant B outperforms baseline
+              by 32%</span>
+            </div><span class="pill pill--green">Ready</span>
+          </div>
+          <div class="activity-item">
+            <div class="activity-meta">
+              <span>Ethics Guardian Escalation — Crisis Brief
+              Draft</span> <span>Awaiting Legal & ESG
+              sign-off</span>
+            </div><span class="pill pill--amber">Pending
+            HITL</span>
+          </div>
+          <div class="activity-item">
+            <div class="activity-meta">
+              <span>AI Orchestrator Completed reroute</span>
+              <span>Playbook applied to APAC investor
+              segment</span>
+            </div><span class="pill pill--green">Executed</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+    <section class="grid grid--four">
+      <div class="card">
+        <h2>Detection Accuracy</h2>
+        <div class="metric">
+          <div>
+            <div class="metric-value">
+              94.7%
+            </div>
+            <div class="metric-trend up">
+              ▲ 1.4%
+            </div>
+          </div>
+          <div class="sparkline">
+            Accuracy Trend
+          </div>
+        </div>
+        <p class="metric-trend flat">24h average confidence</p>
+      </div>
+      <div class="card">
+        <h2>Response Time</h2>
+        <div class="metric">
+          <div>
+            <div class="metric-value">
+              847ms
+            </div>
+            <div class="metric-trend down">
+              ▼ 63ms
+            </div>
+          </div>
+          <div class="sparkline">
+            Latency Trend
+          </div>
+        </div>
+        <p class="metric-trend flat">Genaro orchestration</p>
+      </div>
+      <div class="card">
+        <h2>Active Operations</h2>
+        <div class="metric">
+          <div>
+            <div class="metric-value">
+              18
+            </div>
+            <div class="metric-trend up">
+              ▲ 2
+            </div>
+          </div>
+          <div class="sparkline">
+            Operation Velocity
+          </div>
+        </div>
+        <p class="metric-trend flat">Global orchestrator</p>
+      </div>
+      <div class="card">
+        <h2>System Uptime</h2>
+        <div class="metric">
+          <div>
+            <div class="metric-value">
+              99.97%
+            </div><span class="pill pill--green">Healthy</span>
+          </div>
+          <div class="sparkline">
+            Service Status
+          </div>
+        </div>
+        <p class="metric-trend flat">Across 156 monitored
+        countries</p>
+      </div>
+    </section>
+  </main>
+  <footer class="footer-note">
+    Unified Command Dashboard · Last synchronized:
+    <span data-current-timestamp aria-live="polite">Syncing…</span>
+  </footer>
+  <script src=
+  "https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"
+  defer></script> 
+  <script src=
+  "https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js" defer
+  ></script> 
+  <script src=
+  "https://cdn.jsdelivr.net/npm/dayjs@1.11.10/plugin/utc.min.js"
+  defer></script> 
+  <script src=
+  "https://cdn.jsdelivr.net/npm/dayjs@1.11.10/plugin/timezone.min.js"
+  defer></script> 
+  <script src=
+  "https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"
+  defer></script> 
+  <script src=
+  "https://cdn.jsdelivr.net/npm/tippy.js@6/dist/tippy-bundle.umd.min.js"
+  defer></script> 
+  <script src=
+  "https://cdn.jsdelivr.net/npm/shepherd.js@8.5.1/dist/js/shepherd.min.js"
+  defer></script>
+  <link rel="stylesheet" href=
+  "https://cdn.jsdelivr.net/npm/shepherd.js@8.5.1/dist/css/shepherd.css">
+  <script src=
+  "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"
+  defer></script> 
+  <script src="https://cdn.jsdelivr.net/npm/d3@7" defer></script> 
+  <script src="charts.js" defer></script> 
+  <script src="app.js" defer></script>
+</body>
+</html>
