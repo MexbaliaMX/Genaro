@@ -1,0 +1,42 @@
+{
+  "name": "genaro-dft-2.0",
+  "version": "2.0.0",
+  "description": "A predictive and agentic reputation platform",
+  "type": "module",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "node accessibility-check.js",
+    "accessibility-test": "node accessibility-check.js",
+    "accessibility-test-detailed": "pa11y --config .pa11yci.json src/frontend/index.html",
+    "build-frontend": "node build-frontend.js",
+    "lint": "eslint . --ext .js,.ts --fix",
+    "lint-api": "eslint src/api/v1/**/*.ts --config .eslintrc.json --fix",
+    "perf-test": "npx ts-node performance-test.ts",
+    "perf-report": "npm run perf-test && echo 'Performance test completed. See performance-results-*.json for details.'",
+    "frontend-test": "node frontend-test-suite.js"
+  },
+  "keywords": [
+    "accessibility",
+    "a11y",
+    "reputation",
+    "platform",
+    "monitoring"
+  ],
+  "author": "MexbaliaMX",
+  "license": "MIT",
+  "devDependencies": {
+    "axe-core": "^4.9.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "pa11y": "^8.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}

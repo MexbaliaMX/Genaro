@@ -1,0 +1,131 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run accessibility tests
+      run: npm test
+
+    - name: Install API dependencies
+      working-directory: ./src/api/v1
+      run: npm ci
+
+    - name: Run secure API smoke tests
+      working-directory: ./src/api/v1
+      run: npm run test:api
+
+    - name: Run frontend smoke tests
+      run: npm run frontend-test
+
+    - name: Run linting
+      run: |
+        npm run lint
+        npx eslint src/api/v1/**/*.ts --config .eslintrc.json
+
+    - name: Run TypeScript compilation
+      run: npm run build
+
+    - name: Run security audit
+      run: npm audit --audit-level moderate
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build API server
+      run: npm run build
+      working-directory: ./src/api/v1
+
+    - name: Minify CSS
+      run: |
+        npm install -g uglifycss
+        uglifycss dark_mockups/style.css --output dark_mockups/style.min.css
+        echo "CSS minification completed"
+
+    - name: Optimize HTML
+      run: |
+        # HTML optimization will be done via a custom script
+        npm install -g html-minifier-terser
+        for file in dark_mockups/*.html; do
+          html-minifier-terser --collapse-whitespace --remove-comments --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-tag-whitespace --use-short-doctype --minify-css --minify-js "$file" -o "${file%.html}_min.html"
+        done
+        echo "HTML optimization completed"
+
+    - name: Run bundle size check
+      run: |
+        npm install -g webpack-bundle-analyzer
+        # This is just to ensure we have tools to analyze bundle sizes if needed
+
+    - name: Run additional accessibility tests
+      run: npm run accessibility-test
+
+    - name: Security scanning
+      run: |
+        npm install -g retire
+        retire node_modules/
+        
+    - name: Run security audit
+      run: npm audit --audit-level moderate
+
+    - name: Build Docker image for API
+      run: |
+        docker build -t genaro-dft-api:latest ./src/api/v1
+        docker tag genaro-dft-api:latest genaro-dft-api:${{ github.sha }}
+        
+    - name: Run containerized tests
+      run: |
+        docker run --rm genaro-dft-api:latest npm test
+
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: production-files
+        path: |
+          src/api/v1/dist/
+          dark_mockups/style.min.css
+          dark_mockups/*_min.html
+
+    - name: Deploy to staging
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      run: |
+        echo "Deploying to staging environment..."
+        # Deployment commands would go here

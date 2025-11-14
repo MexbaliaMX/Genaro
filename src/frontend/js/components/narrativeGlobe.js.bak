@@ -1,0 +1,307 @@
+// NarrativeGlobe.js - Three.js globe visualization component
+export class NarrativeGlobe {
+  constructor() {
+    this.THREE_SRC = "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js";
+    this.SHOULD_REDUCE_MOTION = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches || false;
+    
+    // Keep references to Three.js objects for cleanup
+    this.scene = null;
+    this.camera = null;
+    this.renderer = null;
+    this.globe = null;
+    this.points = null;
+    this.halo = null;
+    this.globeGeometry = null;
+    this.globeMaterial = null;
+    this.particleGeometry = null;
+    this.particleMaterial = null;
+    this.haloGeometry = null;
+    this.haloMaterial = null;
+    
+    // Animation and event handling
+    this.animationFrameId = null;
+    this.isPaused = false;
+    this.handleVisibilityChange = null;
+    this.handleResize = null;
+    this.resizeObserver = null;
+  }
+
+  init() {
+    this.initNarrativeGlobe();
+  }
+
+  initNarrativeGlobe() {
+    const container = document.getElementById("dashboard-globe");
+    if (!container) return;
+
+    const renderGlobe = () => this.drawNarrativeGlobe(container);
+
+    if (typeof window.THREE !== "undefined") {
+      renderGlobe();
+      return;
+    }
+
+    this.loadExternalScript(this.THREE_SRC).then(renderGlobe).catch(renderGlobe);
+  }
+
+  loadExternalScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  drawNarrativeGlobe(container) {
+    // Clean up any existing globe before creating a new one
+    this.cleanupGlobe(container);
+    
+    const fallback = container?.querySelector("[data-globe-fallback]");
+    if (!container) return;
+    if (typeof window.THREE === "undefined" || !this.webglAvailable()) {
+      if (fallback) {
+        fallback.hidden = false;
+        const fallbackId = fallback.id || "dashboard-globe-fallback";
+        container.setAttribute("role", "region");
+        container.setAttribute("aria-live", "polite");
+        container.setAttribute("aria-describedby", fallbackId);
+      }
+      return;
+    }
+
+    container.innerHTML = "";
+    container.setAttribute("role", "img");
+    container.setAttribute("aria-live", "off");
+    container.setAttribute("aria-labelledby", "dashboard-globe-title");
+    container.removeAttribute("aria-describedby");
+
+    const width = container.clientWidth || 420;
+    const height = container.clientHeight || 320;
+
+    // Create Three.js objects with references for cleanup
+    this.scene = new window.THREE.Scene();
+    this.camera = new window.THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    this.camera.position.z = 160;
+
+    this.renderer = new window.THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+    });
+    this.renderer.setSize(width, height);
+    this.renderer.setPixelRatio(window.devicePixelRatio || 1.5);
+    container.appendChild(this.renderer.domElement);
+
+    // Create globe objects with references for cleanup
+    this.globeGeometry = new window.THREE.SphereGeometry(55, 48, 48);
+    this.globeMaterial = new window.THREE.MeshBasicMaterial({
+      color: 0x1f293b,
+      wireframe: true,
+      opacity: 0.35,
+      transparent: true,
+    });
+    this.globe = new window.THREE.Mesh(this.globeGeometry, this.globeMaterial);
+    this.scene.add(this.globe);
+
+    this.particleGeometry = new window.THREE.BufferGeometry();
+    const particleCount = 750;
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+
+    const color = new window.THREE.Color();
+    for (let i = 0; i < particleCount; i++) {
+      const lat = window.THREE.MathUtils.degToRad(Math.random() * 180 - 90);
+      const lon = window.THREE.MathUtils.degToRad(Math.random() * 360);
+      const radius = 60 + Math.random() * 6;
+
+      const x = radius * Math.cos(lat) * Math.cos(lon);
+      const y = radius * Math.sin(lat);
+      const z = radius * Math.cos(lat) * Math.sin(lon);
+
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
+
+      const activity = Math.random();
+      color.setHSL(0.56 - activity * 0.25, 0.7, 0.5 + activity * 0.2);
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+    }
+
+    this.particleGeometry.setAttribute("position", new window.THREE.BufferAttribute(positions, 3));
+    this.particleGeometry.setAttribute("color", new window.THREE.BufferAttribute(colors, 3));
+
+    this.particleMaterial = new window.THREE.PointsMaterial({
+      size: 2.2,
+      vertexColors: true,
+      opacity: 0.85,
+      transparent: true,
+    });
+
+    this.points = new window.THREE.Points(this.particleGeometry, this.particleMaterial);
+    this.scene.add(this.points);
+
+    this.haloGeometry = new window.THREE.SphereGeometry(62, 32, 32);
+    this.haloMaterial = new window.THREE.MeshBasicMaterial({
+      color: 0x667eea,
+      transparent: true,
+      opacity: 0.12,
+    });
+    this.halo = new window.THREE.Mesh(this.haloGeometry, this.haloMaterial);
+    this.scene.add(this.halo);
+
+    const renderFrame = () => this.renderer.render(this.scene, this.camera);
+
+    if (!this.SHOULD_REDUCE_MOTION) {
+      const animate = () => {
+        if (this.isPaused) return;
+        this.globe.rotation.y += 0.0009;
+        this.points.rotation.y += 0.0014;
+        this.halo.rotation.y += 0.0006;
+        renderFrame();
+        this.animationFrameId = requestAnimationFrame(animate);
+      };
+      animate();
+
+      // Store reference to the visibility change handler for cleanup
+      this.handleVisibilityChange = () => {
+        if (document.hidden) {
+          this.isPaused = true;
+          if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+          }
+        } else if (this.isPaused) {
+          this.isPaused = false;
+          animate();
+        }
+      };
+      document.addEventListener("visibilitychange", this.handleVisibilityChange);
+    } else {
+      renderFrame();
+    }
+
+    // Store reference to resize handler for cleanup
+    this.handleResize = () => {
+      const newWidth = container.clientWidth || width;
+      const newHeight = container.clientHeight || height;
+      this.renderer.setSize(newWidth, newHeight);
+      this.camera.aspect = newWidth / newHeight;
+      this.camera.updateProjectionMatrix();
+    };
+
+    if (typeof ResizeObserver !== "undefined") {
+      this.resizeObserver = new ResizeObserver(() => this.handleResize());
+      this.resizeObserver.observe(container);
+    } else {
+      window.addEventListener("resize", this.handleResize);
+    }
+  }
+
+  // Clean up all Three.js resources
+  cleanupGlobe(container) {
+    // Cancel any ongoing animation
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+    
+    // Remove event listeners
+    if (this.handleVisibilityChange) {
+      document.removeEventListener("visibilitychange", this.handleVisibilityChange);
+      this.handleVisibilityChange = null;
+    }
+    
+    if (this.handleResize) {
+      window.removeEventListener("resize", this.handleResize);
+      this.handleResize = null;
+    }
+    
+    // Disconnect resize observer
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
+    }
+    
+    // Dispose of geometries and materials
+    if (this.globeGeometry) {
+      this.globeGeometry.dispose();
+      this.globeGeometry = null;
+    }
+    
+    if (this.globeMaterial) {
+      this.globeMaterial.dispose();
+      this.globeMaterial = null;
+    }
+    
+    if (this.particleGeometry) {
+      this.particleGeometry.dispose();
+      this.particleGeometry = null;
+    }
+    
+    if (this.particleMaterial) {
+      this.particleMaterial.dispose();
+      this.particleMaterial = null;
+    }
+    
+    if (this.haloGeometry) {
+      this.haloGeometry.dispose();
+      this.haloGeometry = null;
+    }
+    
+    if (this.haloMaterial) {
+      this.haloMaterial.dispose();
+      this.haloMaterial = null;
+    }
+    
+    // Remove renderer
+    if (this.renderer) {
+      if (this.renderer.domElement && container && container.contains(this.renderer.domElement)) {
+        container.removeChild(this.renderer.domElement);
+      }
+      this.renderer.dispose();
+      this.renderer = null;
+    }
+    
+    // Clear scene objects
+    if (this.scene) {
+      if (this.globe) {
+        this.scene.remove(this.globe);
+        if (this.globe.geometry) this.globe.geometry.dispose();
+        if (this.globe.material) this.globe.material.dispose();
+      }
+      if (this.points) {
+        this.scene.remove(this.points);
+        if (this.points.geometry) this.points.geometry.dispose();
+        if (this.points.material) this.points.material.dispose();
+      }
+      if (this.halo) {
+        this.scene.remove(this.halo);
+        if (this.halo.geometry) this.halo.geometry.dispose();
+        if (this.halo.material) this.halo.material.dispose();
+      }
+    }
+    
+    // Clear references
+    this.scene = null;
+    this.camera = null;
+    this.globe = null;
+    this.points = null;
+    this.halo = null;
+    this.isPaused = false;
+  }
+
+  webglAvailable() {
+    try {
+      const canvas = document.createElement("canvas");
+      return !!(
+        window.WebGLRenderingContext &&
+        (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
+      );
+    } catch (e) {
+      return false;
+    }
+  }
+}

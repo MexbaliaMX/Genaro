@@ -1,0 +1,138 @@
+// dataService.js - Service for fetching and processing data for visualizations
+import { apiService } from './apiService.js';
+
+export class DataService {
+  constructor() {
+    this.api = apiService;
+  }
+
+  async getDashboardData(narrativeId = 'nar-global-ops') {
+    try {
+      // Fetch multiple data points needed for the dashboard
+      const [narratives, metrics, alerts, platformDistribution, timeSeries] = await Promise.allSettled([
+        this.api.getNarratives(),
+        this.api.getMetrics(),
+        this.api.getAlerts(),
+        this.api.getPlatformDistribution(),
+        this.api.getTimeSeriesData('threat_index')
+      ]);
+
+      // Check for rejections and report errors
+      const results = {
+        narratives: narratives.status === 'fulfilled' ? narratives.value : [],
+        metrics: metrics.status === 'fulfilled' ? metrics.value : [],
+        alerts: alerts.status === 'fulfilled' ? alerts.value : [],
+        platformDistribution: platformDistribution.status === 'fulfilled' ? platformDistribution.value : [],
+        timeSeries: timeSeries.status === 'fulfilled' ? timeSeries.value : { data: [] }
+      };
+      
+      // Report any failed requests
+      const failedRequests = [
+        { name: 'narratives', result: narratives },
+        { name: 'metrics', result: metrics },
+        { name: 'alerts', result: alerts },
+        { name: 'platformDistribution', result: platformDistribution },
+        { name: 'timeSeries', result: timeSeries }
+      ].filter(req => req.result.status === 'rejected');
+      
+      if (failedRequests.length > 0) {
+        console.warn(`${failedRequests.length} dashboard data requests failed:`, failedRequests.map(r => r.name));
+        // Show notification for failed requests
+        if (failedRequests.length === 5) {
+          // All requests failed
+          apiService.showNotification('Could not load dashboard data. Using cached/mocked data.', 'error');
+        } else {
+          // Partial failure
+          const failedNames = failedRequests.map(r => r.name).join(', ');
+          apiService.showNotification(`Some data failed to load (${failedNames}). Showing cached/mocked data.`, 'error');
+        }
+      }
+      
+      return results;
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+      apiService.showNotification('Failed to load dashboard data. Using cached/mocked data.', 'error');
+      return {
+        narratives: [],
+        metrics: [],
+        alerts: [],
+        platformDistribution: [],
+        timeSeries: { data: [] }
+      };
+    }
+  }
+
+  async getNarrativeData(narrativeId) {
+    try {
+      const [narrative, metrics] = await Promise.allSettled([
+        this.api.getNarrativeById(narrativeId),
+        this.api.getNarrativeMetrics(narrativeId)
+      ]);
+
+      const results = {
+        narrative: narrative.status === 'fulfilled' ? narrative.value : null,
+        metrics: metrics.status === 'fulfilled' ? metrics.value : []
+      };
+      
+      // Report any failed requests
+      const failedRequests = [
+        { name: 'narrative', result: narrative },
+        { name: 'metrics', result: metrics }
+      ].filter(req => req.result.status === 'rejected');
+      
+      if (failedRequests.length > 0) {
+        console.warn(`${failedRequests.length} narrative data requests failed:`, failedRequests.map(r => r.name));
+        const failedNames = failedRequests.map(r => r.name).join(', ');
+        apiService.showNotification(`Some narrative data failed to load (${failedNames}). Showing cached/mocked data.`, 'error');
+      }
+      
+      return results;
+    } catch (error) {
+      console.error('Failed to fetch narrative data:', error);
+      apiService.showNotification('Failed to load narrative data. Using cached/mocked data.', 'error');
+      return {
+        narrative: null,
+        metrics: []
+      };
+    }
+  }
+
+  async getRiskData(narrativeId) {
+    try {
+      // Attempt to get real risk data, fallback to mock if unavailable
+      return await this.api.request(`/risk/narratives/${narrativeId}`);
+    } catch (error) {
+      console.warn('Real risk data not available, using mock:', error);
+      apiService.showNotification(`Could not load risk data for ${narrativeId}. Using simulated data.`, 'error');
+      // Fallback to mock data through the API service
+      return await this.api.handleMockRequest(`/risk/narratives/${narrativeId}`);
+    }
+  }
+
+  async getExecutiveData(narrativeId) {
+    try {
+      // Attempt to get real executive data, fallback to mock if unavailable
+      return await this.api.request(`/executive/narratives/${narrativeId}`);
+    } catch (error) {
+      console.warn('Real executive data not available, using mock:', error);
+      apiService.showNotification(`Could not load executive data for ${narrativeId}. Using simulated data.`, 'error');
+      // Fallback to mock data through the API service
+      return await this.api.handleMockRequest(`/executive/narratives/${narrativeId}`);
+    }
+  }
+
+  async getAdvertisingData(entityId) {
+    try {
+      // Attempt to get real advertising data, fallback to mock if unavailable
+      return await this.api.request(`/advertising/entities/${entityId}`);
+    } catch (error) {
+      console.warn('Real advertising data not available, using mock:', error);
+      apiService.showNotification(`Could not load advertising data for ${entityId}. Using simulated data.`, 'error');
+      // Fallback to mock data through the API service
+      return await this.api.handleMockRequest(`/advertising/entities/${entityId}`);
+    }
+  }
+}
+
+// Export a singleton instance
+export const dataService = new DataService();

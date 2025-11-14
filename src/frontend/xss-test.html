@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XSS Test for Genaro DFT 2.0</title>
+    <link rel="stylesheet" href="style.min.css">
+</head>
+<body data-page="test" class="page-shell">
+    <header class="top-bar">
+    <div class="brand">
+      <div>
+        <h1>Genaro DFT 2.0</h1><span class="status-pill">Active
+        Monitoring</span>
+      </div><button type="button" class="tour-trigger" data-tour-trigger="">▸
+      Guided Tour</button>
+    </div>
+    <div class="top-bar-actions">
+      <div class="search-bar">
+        <svg width="16" height="16" fill="currentColor"
+        aria-hidden="true" viewBox="0 0 16 16">
+        <title>Search Icon</title>
+        <path d=
+        "M11 6a5 5 0 1 1-1-3.874L10.414 3l.293-.293A1 1 0 0 1 12.414 4l-.293.293L12 4.586l.293.293A1 1 0 0 1 12.414 6l-.293.293L12 6.586l-1.293 1.293A5 5 0 0 1 11 6Z">
+        </path></svg> <input type="search" placeholder=
+        "Ask Genaro to simulate, brief, or execute…" aria-label=
+        "Global command search">
+      </div>
+      <nav class="secondary-nav" aria-label="Primary navigation">
+        <a href="index.html" data-nav="dashboard">Dashboard</a>
+        <a href="narrative-tracker.html" data-nav=
+        "narrative">Narrative Tracker</a> <a href=
+        "risk-integrity.html" data-nav="risk">Risk &amp; Integrity</a>
+        <a href="sandbox-studio.html" data-nav="sandbox">Sandbox
+        Studio</a> <a href="executive-briefing.html" data-nav=
+        "briefing">Executive Briefing</a> <a href=
+        "advertising-dashboard.html" data-nav=
+        "advertising">Advertising Dashboard</a>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true" data-theme-toggle-icon>🌙</span>
+        <span class="sr-only" data-theme-toggle-label>Switch to Light Theme</span>
+      </button>
+      <button class="layout-toggle" type="button" data-layout-toggle aria-pressed="false">
+        <span class="sr-only" data-layout-toggle-label>Expand layout</span>
+        <span aria-hidden="true">⇱</span>
+      </button>
+      <div class="status-pill status-pill--warning">
+        Threat Level: Elevated
+      </div>
+    </div>
+  </header>
+  <main id="main">
+        <section class="card">
+            <h2>XSS Protection Test</h2>
+            <div id="test-results">
+                <p>Testing XSS protection in API service...</p>
+            </div>
+            
+            <div id="xss-test-area" class="chart-surface" style="height: 100px; margin-top: 20px; padding: 10px;">
+                <p>Area to test for XSS attempts</p>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Vendor libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"
+    integrity="sha384-fXdIufVbE9aU7STmdk/DWK0imNOozId9fTwzM/gi0NfPjphEIC3gq0M760UnsKVy"
+    crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"
+    integrity="sha384-DpVxUeeBWjUvUV1czyIHJAjh+jYUZFu2lLakbdua5vbwOrBGi1UgaKCHjTC+x3Ky"
+    crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/plugin/utc.min.js"
+    integrity="sha384-v5EASqtC8vOzJPfm3H3wUfq37w7G48AkP2p87r28TlXwgI9nNJpHt1pMHVx3cfnM"
+    crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/plugin/timezone.min.js"
+    integrity="sha384-cM2X/vROwLSI+k8Z152oNnWyenz5Nv2sgf4/7V+Yv23JiNvQ0KEttZfK3DvhyoWl"
+    crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"
+    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+    crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tippy.js@6/dist/tippy-bundle.umd.min.js"
+    integrity="sha384-AiTRpehQ7zqeua0Ypfa6Q4ki/ddhczZxrKtiQbTQUlJIhBkTeyoZP9/W/5ulFt29"
+    crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"
+    integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i"
+    crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"
+    integrity="sha384-L2D7QfBz1ZU4zYMwqVj4Q92W02ZYOGx8rZn3kk5Z3Zb2+5pQp5W1f4ctPgL+l"
+    crossorigin="anonymous"></script>
+
+    <script type="module">
+        import { ApiService } from './js/services/apiService.js';
+        
+        console.log('Starting XSS protection test...');
+        
+        const resultsContainer = document.getElementById('test-results');
+        const xssTestArea = document.getElementById('xss-test-area');
+        
+        function addTestResult(testName, success, details = '') {
+            const status = success ? '✅' : '❌';
+            const result = document.createElement('p');
+            result.innerHTML = `${status} <strong>${testName}</strong> ${details}`;
+            resultsContainer.appendChild(result);
+        }
+        
+        // Test the API service sanitization
+        const apiService = new ApiService();
+        
+        // Test 1: String sanitization
+        try {
+            const originalString = '<script>alert("XSS")</script>Hello World';
+            const sanitizedString = apiService.sanitizeString(originalString);
+            
+            if (sanitizedString === '&lt;script&gt;alert("XSS")&lt;/script&gt;Hello World') {
+                addTestResult('String sanitization', true, '(properly escaped)');
+            } else {
+                addTestResult('String sanitization', false, `(got: ${sanitizedString})`);
+            }
+        } catch (e) {
+            addTestResult('String sanitization', false, e.message);
+        }
+        
+        // Test 2: Object sanitization
+        try {
+            const originalObject = {
+                title: '<script>alert("XSS")</script>',
+                description: 'Safe content',
+                nested: {
+                    content: '<img src="x" onerror="alert(\'XSS\')">'
+                }
+            };
+            
+            const sanitizedObject = apiService.sanitizeResponseData(originalObject);
+            
+            if (sanitizedObject.title === '&lt;script&gt;alert("XSS")&lt;/script&gt;' && 
+                sanitizedObject.nested.content === '&lt;img src="x" onerror="alert(\'XSS\')"&gt;') {
+                addTestResult('Object sanitization', true, '(properly escaped)');
+            } else {
+                addTestResult('Object sanitization', false, '(not properly sanitized)');
+            }
+        } catch (e) {
+            addTestResult('Object sanitization', false, e.message);
+        }
+        
+        // Test 3: Array sanitization
+        try {
+            const originalArray = [
+                '<script>alert("XSS")</script>',
+                'Safe item',
+                { dangerous: '<img src="x" onload="alert(\'XSS\')">' }
+            ];
+            
+            const sanitizedArray = apiService.sanitizeResponseData(originalArray);
+            
+            if (sanitizedArray[0] === '&lt;script&gt;alert("XSS")&lt;/script&gt;' && 
+                sanitizedArray[2].dangerous === '&lt;img src="x" onload="alert(\'XSS\')"&gt;') {
+                addTestResult('Array sanitization', true, '(properly escaped)');
+            } else {
+                addTestResult('Array sanitization', false, '(not properly sanitized)');
+            }
+        } catch (e) {
+            addTestResult('Array sanitization', false, e.message);
+        }
+        
+        // Test 4: API response sanitization
+        try {
+            const sampleResponse = {
+                title: 'Normal Title',
+                description: '<script>alert("XSS from sample")</script>Dangerous description',
+                metrics: [
+                    { kpi: 'narratives_monitored', value: '<img src=x onerror=alert("XSS")>' }
+                ]
+            };
+            
+            const sanitizedResponse = apiService.sanitizeResponseData(sampleResponse);
+            
+            if (sanitizedResponse.description.includes('&lt;script&gt;') && 
+                sanitizedResponse.metrics[0].value.includes('&lt;img')) {
+                addTestResult('API response sanitization', true, '(properly escaped)');
+            } else {
+                addTestResult('API response sanitization', false, '(not properly sanitized)');
+            }
+        } catch (e) {
+            addTestResult('API response sanitization', false, e.message);
+        }
+        
+        // Test 5: XSS attempt in UI rendering
+        try {
+            // Try to render a potentially dangerous string to see if it gets sanitized
+            const dangerousContent = '<img src="nonexistent.jpg" onerror="window.xssTestFailed = true">';
+            xssTestArea.innerHTML += `<div>${dangerousContent}</div>`;
+            
+            // Wait a moment for potential XSS to execute, then check if it did
+            setTimeout(() => {
+                if (window.xssTestFailed) {
+                    addTestResult('XSS Rendering Prevention', false, '(XSS script executed)');
+                } else {
+                    addTestResult('XSS Rendering Prevention', true, '(XSS prevented)');
+                }
+            }, 100);
+        } catch (e) {
+            addTestResult('XSS Rendering Prevention', false, e.message);
+        }
+        
+        console.log('XSS protection test completed.');
+    </script>
+</body>
+</html>

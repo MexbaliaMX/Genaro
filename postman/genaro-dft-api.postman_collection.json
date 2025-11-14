@@ -1,0 +1,226 @@
+{
+  "info": {
+    "_postman_id": "9f0df2b0-7ef1-4c13-9a26-e71b9e9c1c55",
+    "name": "Genaro DFT API",
+    "description": "Postman collection with sample requests for the Genaro DFT API v1 endpoints (dev server on http://localhost:3000).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Ingest Webhook",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"source\": \"tiktok\",\n  \"external_id\": \"ext_12345\",\n  \"fetched_at\": \"2024-02-20T12:00:00Z\",\n  \"payload\": {\n    \"caption\": \"Sample narrative mention\",\n    \"media_urls\": [\"https://example.com/video.mp4\"]\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/ingest/webhook/tiktok",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "ingest",
+            "webhook",
+            "tiktok"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Narrative Metrics",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/narratives/nar-global-ops/metrics?window=7d",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "narratives",
+            "nar-global-ops",
+            "metrics"
+          ],
+          "query": [
+            {
+              "key": "window",
+              "value": "7d"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Search Artifacts",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/search?query=deepfake&page=1&page_size=25",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "search"
+          ],
+          "query": [
+            {
+              "key": "query",
+              "value": "deepfake"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "page_size",
+              "value": "25"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "KPI Metrics",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/metrics/kpis?entity_type=narrative&window=24h",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "metrics",
+            "kpis"
+          ],
+          "query": [
+            {
+              "key": "entity_type",
+              "value": "narrative"
+            },
+            {
+              "key": "window",
+              "value": "24h"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Test Alert Rule",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rule_id\": \"alert-demo\",\n  \"payload\": {\n    \"narrative_id\": \"nar-global-ops\",\n    \"sentiment\": -0.7,\n    \"confidence\": 0.83\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/alerts/test",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "alerts",
+            "test"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Exports SAC",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"destination\": \"s3://genaro-dft/exports/nar-global-ops\",\n  \"filters\": {\n    \"narrative_id\": \"nar-global-ops\",\n    \"window\": \"7d\",\n    \"risk_level\": \"elevated\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/exports/sac",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "exports",
+            "sac"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Secure Health Check",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.variables.set(\"secure_base_url\", pm.environment.get(\"secure_base_url\") || \"http://localhost:3000\");"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{secure_base_url}}/security/health",
+          "host": [
+            "{{secure_base_url}}"
+          ],
+          "path": [
+            "security",
+            "health"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "secure_base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}
