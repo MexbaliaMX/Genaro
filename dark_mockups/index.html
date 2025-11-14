@@ -9,7 +9,7 @@
   <title>Genaro — Unified Command Dashboard</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body data-page="dashboard" data-narrative-id="nar-global-ops" data-brand-id="brand-genaro" class="page-shell">
+<body data-page="dashboard" data-narrative-id="nar-trump-ai-propaganda" data-brand-id="brand-genaro" class="page-shell">
   <a class="skip-link" href="#main">Skip to main content</a>
   <header class="top-bar">
     <div class="brand">
@@ -65,7 +65,7 @@
               "pill pill--amber">Elevated</span>
             </div>
           </div>
-          <div class="flex-column" style="flex:1;">
+          <div class="flex-column flex-1-gap">
             <div class="metric">
               <div>
                 <div class="metric-value">
@@ -104,8 +104,7 @@
         </div>
         <div class="grid legend legend--stacked" aria-label="Narrative segments">
           <div class="legend-item" data-tippy-content="Emerging narratives represent 52% of total volume">
-            <span class="legend-dot" style=
-            "background:var(--accent-blue);" aria-hidden=
+            <span class="legend-dot legend-dot--blue" aria-hidden=
             "true">&nbsp;</span>
             <div>
               <strong>Emerging</strong>
@@ -114,8 +113,7 @@
             </div>
           </div>
           <div class="legend-item" data-tippy-content="Volatile narratives account for 37% of observations">
-            <span class="legend-dot" style=
-            "background:var(--accent-amber);" aria-hidden=
+            <span class="legend-dot legend-dot--orange" aria-hidden=
             "true">&nbsp;</span>
             <div>
               <strong>Volatile</strong>
@@ -124,8 +122,7 @@
             </div>
           </div>
           <div class="legend-item" data-tippy-content="Critical narratives currently represent 11% of monitored set">
-            <span class="legend-dot" style=
-            "background:var(--accent-red);" aria-hidden=
+            <span class="legend-dot legend-dot--red" aria-hidden=
             "true">&nbsp;</span>
             <div>
               <strong>Critical</strong>
@@ -187,9 +184,8 @@
         </div>
       </div>
     </section>
-    <section class="grid" style=
-    "grid-template-columns: 2.2fr 1fr;">
-      <div class="flex-column" style="gap:1.5rem;">
+    <section class="grid grid-cols-2-2fr-1fr">
+      <div class="flex-column gap-sm-1-5rem">
         <div class="card" data-tour="heatmap">
           <h2 id="dashboard-globe-title">Global Narrative
           Current</h2>
@@ -204,21 +200,21 @@
             </div>
           </div>
         </div>
-        <div class="card" style="min-height:360px;">
+        <div class="card min-h-360">
           <h2>Narrative Activity — Heatmap</h2>
           <div class="chart-surface" id="dashboard-heatmap" role=
           "img" aria-label="Narrative activity heatmap"></div>
           <div class="legend">
             <div class="legend-item">
-              <span class="legend-dot" style="background:#38bdf8;"
+              <span class="legend-dot legend-dot--cyan"
               aria-hidden="true">&nbsp;</span>Low Activity
             </div>
             <div class="legend-item">
-              <span class="legend-dot" style="background:#f97316;"
+              <span class="legend-dot legend-dot--orange"
               aria-hidden="true">&nbsp;</span>Medium
             </div>
             <div class="legend-item">
-              <span class="legend-dot" style="background:#ef4444;"
+              <span class="legend-dot legend-dot--red"
               aria-hidden="true">&nbsp;</span>High
             </div>
           </div>

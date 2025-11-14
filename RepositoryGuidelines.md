@@ -4,7 +4,14 @@
 Keep strategic documents at the repository root (`Genaro.md`, `Agents.md`). Place future agent specifications under `agents/` and analytical notebooks under `research/`. When introducing executable code, mirror the agent taxonomy (perception, analytics, content, action, orchestrator) so each directory aligns with its operational role. Store shared assets—prompt libraries, data schemas, diagrams—in `assets/` with subfolders per medium (`/assets/prompts`, `/assets/figures`).
 
 ## Build, Test, and Development Commands
-This repository is documentation-first. If you add automation or simulation artifacts, expose workflows through lightweight scripts (e.g., `scripts/simulate.sh`). Document any new command in the script header and in `README.md`. Before publishing a command, verify it runs cleanly on a fresh clone using only the dependencies declared in accompanying docs.
+This repository now includes both documentation and a full implementation of the Genaro DFT 2.0 platform. For executable components, use the appropriate tools:
+
+- Frontend: React with TypeScript, fully responsive design, build with `npm run build`, serve with `npm run dev`
+- API: Node.js with Express, test with `npm run test`
+- Integration Layer: Follow the patterns in `src/integration_layer/`
+- Documentation: Markdown files using the conventions described below
+
+Document any new command in the script header and in `README.md`. Before publishing a command, verify it runs cleanly on a fresh clone using only the dependencies declared in accompanying docs.
 
 ## Coding Style & Naming Conventions
 Write Markdown in English unless a section targets a Spanish-speaking stakeholder; keep headings in Title Case and limit line length to ~100 characters. For code samples or utilities, prefer TypeScript or Python; use 2-space indentation for TypeScript and 4-space for Python. Name files using kebab-case for docs (`agent-orchestrator.md`) and snake_case for scripts (`run_sandbox.py`). Cite large language model prompts inside fenced code blocks labeled with the intended runtime (e.g., ```prompt```).

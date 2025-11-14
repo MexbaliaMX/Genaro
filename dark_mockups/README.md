@@ -1,8 +1,16 @@
-# Dark Mockups — Genaro DFT 2.0
+# Dark Mockups — Genaro DFT 2.0 Legacy Static Implementation
 
-High-fidelity, dark-theme HTML prototypes that demonstrate the Genaro DFT 2.0 UI experience. Each
-page includes interactive D3 analytics, a Three.js global narrative visual and accessibility
-affordances (skip links, aria labels, tooltips).
+Legacy high-fidelity, dark-theme HTML prototypes that served as the foundation for the Genaro DFT 2.0 UI experience. These static HTML files have been superseded by the new React-based dynamic frontend application in `/src/frontend/`. Each page includes interactive D3 analytics, a Three.js global narrative visual and accessibility affordances (skip links, aria labels, tooltips).
+
+## Relationship to Current Implementation
+
+The dynamic React frontend application in `/src/frontend/` builds upon these mockups with:
+- Component-based architecture using React and TypeScript
+- State management with Context API
+- Dynamic data binding to API services
+- Improved accessibility features
+- Enhanced performance optimizations
+- Automated testing and CI/CD pipeline
 
 ## Structure
 
