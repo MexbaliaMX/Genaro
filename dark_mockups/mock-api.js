@@ -193,6 +193,171 @@
         ],
       },
     },
+    "nar-trump-ai-propaganda": {
+      region_category: {
+        metrics: [
+          {
+            kpi: "activity_index",
+            breakdown: createBreakdown(
+              [
+                { region: "USA", category: "Politics", value: 89 },
+                { region: "USA", category: "Media", value: 76 },
+                { region: "Europe", category: "Politics", value: 54 },
+                { region: "Europe", category: "Media", value: 43 },
+                { region: "APAC", category: "Politics", value: 32 },
+                { region: "APAC", category: "Media", value: 28 },
+                { region: "LATAM", category: "Politics", value: 45 },
+                { region: "LATAM", category: "Media", value: 38 }
+              ],
+              ["region", "category"]
+            ),
+          },
+        ],
+      },
+      origin_daily: {
+        metrics: [
+          {
+            kpi: "origin_volume_organic",
+            breakdown: createBreakdown(
+              [
+                { date: "2025-11-06", value: 52 },
+                { date: "2025-11-07", value: 58 },
+                { date: "2025-11-08", value: 64 },
+                { date: "2025-11-09", value: 69 },
+                { date: "2025-11-10", value: 75 },
+                { date: "2025-11-11", value: 82 },
+                { date: "2025-11-12", value: 88 }
+              ],
+              ["date"]
+            ),
+          },
+          {
+            kpi: "origin_volume_synthetic",
+            breakdown: createBreakdown(
+              [
+                { date: "2025-11-06", value: 24 },
+                { date: "2025-11-07", value: 29 },
+                { date: "2025-11-08", value: 35 },
+                { date: "2025-11-09", value: 39 },
+                { date: "2025-11-10", value: 42 },
+                { date: "2025-11-11", value: 48 },
+                { date: "2025-11-12", value: 54 }
+              ],
+              ["date"]
+            ),
+          },
+        ],
+      },
+      platform: {
+        metrics: [
+          {
+            kpi: "platform_share",
+            breakdown: createBreakdown(
+              [
+                { platform: "Truth Social", value: 45 },
+                { platform: "Twitter/X", value: 26 },
+                { platform: "TikTok", value: 15 },
+                { platform: "YouTube", value: 8 },
+                { platform: "Gab", value: 6 }
+              ],
+              ["platform"]
+            ),
+          },
+        ],
+      },
+      sentiment_hour: {
+        metrics: [
+          {
+            kpi: "sentiment_overall",
+            breakdown: createBreakdown(
+              [
+                { hour: "2025-11-12T00:00:00Z", value: 48 },
+                { hour: "2025-11-12T04:00:00Z", value: 45 },
+                { hour: "2025-11-12T08:00:00Z", value: 51 },
+                { hour: "2025-11-12T12:00:00Z", value: 55 },
+                { hour: "2025-11-12T16:00:00Z", value: 52 },
+                { hour: "2025-11-12T20:00:00Z", value: 49 },
+                { hour: "2025-11-13T00:00:00Z", value: 47 }
+              ],
+              ["hour"]
+            ),
+          },
+          {
+            kpi: "sentiment_authentic",
+            breakdown: createBreakdown(
+              [
+                { hour: "2025-11-12T00:00:00Z", value: 52 },
+                { hour: "2025-11-12T04:00:00Z", value: 49 },
+                { hour: "2025-11-12T08:00:00Z", value: 55 },
+                { hour: "2025-11-12T12:00:00Z", value: 58 },
+                { hour: "2025-11-12T16:00:00Z", value: 56 },
+                { hour: "2025-11-12T20:00:00Z", value: 53 },
+                { hour: "2025-11-13T00:00:00Z", value: 51 }
+              ],
+              ["hour"]
+            ),
+          },
+          {
+            kpi: "sentiment_synthetic",
+            breakdown: createBreakdown(
+              [
+                { hour: "2025-11-12T00:00:00Z", value: 24 },
+                { hour: "2025-11-12T04:00:00Z", value: 21 },
+                { hour: "2025-11-12T08:00:00Z", value: 27 },
+                { hour: "2025-11-12T12:00:00Z", value: 29 },
+                { hour: "2025-11-12T16:00:00Z", value: 26 },
+                { hour: "2025-11-12T20:00:00Z", value: 23 },
+                { hour: "2025-11-13T00:00:00Z", value: 21 }
+              ],
+              ["hour"]
+            ),
+          },
+        ],
+      },
+      geo: {
+        metrics: [
+          {
+            kpi: "geo_intensity",
+            breakdown: createBreakdown(
+              [
+                { region: "USA", value: 89 },
+                { region: "United Kingdom", value: 64 },
+                { region: "Germany", value: 52 },
+                { region: "Brazil", value: 46 },
+                { region: "India", value: 38 }
+              ],
+              ["region"]
+            ),
+          },
+          {
+            kpi: "geo_trend_pct",
+            breakdown: createBreakdown(
+              [
+                { region: "USA", value: 15 },
+                { region: "United Kingdom", value: 8 },
+                { region: "Germany", value: 6 },
+                { region: "Brazil", value: 11 },
+                { region: "India", value: 7 }
+              ],
+              ["region"]
+            ),
+          },
+          {
+            kpi: "geo_sentiment_shift",
+            breakdown: createBreakdown(
+              [
+                { region: "USA", value: -12 },
+                { region: "United Kingdom", value: 5 },
+                { region: "Germany", value: 3 },
+                { region: "Brazil", value: 8 },
+                { region: "India", value: -4 }
+              ],
+              ["region"]
+            ),
+          },
+        ],
+      },
+    },
   };
 
   const aggregateMetrics = {
@@ -242,6 +407,35 @@
         risk_level: "critical",
       },
     },
+    "nar-trump-ai-propaganda": {
+      nodes: [
+        { id: "trump-ai-01", role: "AI Creator", critical: true },
+        { id: "trump-ai-02", role: "AI Creator", critical: false },
+        { id: "media-117", role: "Echo Chamber", critical: false },
+        { id: "media-204", role: "Echo Chamber", critical: true },
+        { id: "media-322", role: "Echo Chamber", critical: false },
+        { id: "bot-41", role: "Bot Amplifier", critical: false },
+        { id: "bot-58", role: "Bot Amplifier", critical: false },
+        { id: "bot-441", role: "Bot Amplifier", critical: false },
+        { id: "syndicator-598", role: "Content Syndicator", critical: false },
+      ],
+      links: [
+        { source: "trump-ai-01", target: "media-117", weight: 0.94 },
+        { source: "trump-ai-01", target: "media-204", weight: 0.91 },
+        { source: "trump-ai-01", target: "bot-41", weight: 0.72 },
+        { source: "trump-ai-02", target: "media-322", weight: 0.81 },
+        { source: "trump-ai-02", target: "bot-58", weight: 0.75 },
+        { source: "bot-41", target: "bot-441", weight: 0.68 },
+        { source: "bot-41", target: "syndicator-598", weight: 0.63 },
+        { source: "bot-58", target: "bot-441", weight: 0.52 },
+        { source: "media-204", target: "bot-441", weight: 0.45 },
+      ],
+      metadata: {
+        event_id: "risk-2511-01",
+        narrative_id: "nar-trump-ai-propaganda",
+        risk_level: "high",
+      },
+    },
   };
 
   const sandboxSimulations = {
@@ -270,6 +464,33 @@
         { segment: "Advocates", engagement: 91, sentiment: 0.62 },
         { segment: "Skeptics", engagement: 47, sentiment: -0.21 },
         { segment: "Regulators", engagement: 55, sentiment: 0.12 },
+      ],
+    },
+    "nar-trump-ai-propaganda": {
+      network: {
+        nodes: [
+          { id: "trump-supporters", camp: "Supporter", influence: 9 },
+          { id: "ai-content-producers", camp: "Supporter", influence: 7 },
+          { id: "conspiracy-followers", camp: "Supporter", influence: 8 },
+          { id: "moderate-republicans", camp: "Opposition", influence: 5 },
+          { id: "mainstream-media-users", camp: "Opposition", influence: 6 },
+          { id: "independent-voters", camp: "Neutral", influence: 4 },
+        ],
+        links: [
+          { source: "trump-supporters", target: "conspiracy-followers", strength: 0.78 },
+          { source: "trump-supporters", target: "ai-content-producers", strength: 0.72 },
+          { source: "ai-content-producers", target: "conspiracy-followers", strength: 0.69 },
+          { source: "moderate-republicans", target: "mainstream-media-users", strength: 0.61 },
+          { source: "trump-supporters", target: "independent-voters", strength: 0.55 },
+          { source: "mainstream-media-users", target: "independent-voters", strength: 0.45 },
+        ],
+      },
+      segments: [
+        { segment: "Far Right", engagement: 88, sentiment: 0.82 },
+        { segment: "Moderate Republicans", engagement: 52, sentiment: 0.31 },
+        { segment: "AI Enthusiasts", engagement: 79, sentiment: 0.75 },
+        { segment: "Anti-AI Skeptics", engagement: 64, sentiment: -0.68 },
+        { segment: "Conspiracy Theorists", engagement: 91, sentiment: 0.85 },
       ],
     },
   };
@@ -316,6 +537,47 @@
         { role: "Legal", recipients: 1, color: "#ef4444" },
       ],
     },
+    "nar-trump-ai-propaganda": {
+      threatRegions: [
+        { region: "USA", score: 89, color: "#ef4444" },
+        { region: "United Kingdom", score: 64, color: "#f97316" },
+        { region: "Germany", score: 52, color: "#6366f1" },
+        { region: "Brazil", score: 46, color: "#3b82f6" },
+        { region: "India", score: 38, color: "#22d3ee" },
+      ],
+      categoryBreakdown: [
+        { label: "AI-Generated Content", value: 42, color: "#ef4444" },
+        { label: "Deepfakes/Misinformation", value: 31, color: "#f97316" },
+        { label: "Echo Chambers", value: 18, color: "#6366f1" },
+        { label: "Coordinated Campaigns", value: 12, color: "#22d3ee" },
+        { label: "Organic Threats", value: 7, color: "#94a3b8" },
+      ],
+      incidents: [
+        { day: 3, impact: 45, label: "AI-generated Obama arrest video" },
+        { day: 7, impact: 68, label: "Truth Social propaganda surge" },
+        { day: 11, impact: 52, label: "Synthetic media campaign" },
+        { day: 14, impact: 76, label: "Grim Reaper government imagery" },
+        { day: 18, impact: 58, label: "Counter narrative attempts" },
+      ],
+      impactScores: [
+        { label: "Electoral Influence", value: 89, color: "#60a5fa" },
+        { label: "Democratic Discourse", value: 45, color: "#ef4444" },
+        { label: "Media Trust", value: 52, color: "#f97316" },
+      ],
+      forecastBands: [
+        { horizon: "30d", risk: 72, lower: 65, upper: 78 },
+        { horizon: "60d", risk: 78, lower: 70, upper: 85 },
+        { horizon: "90d", risk: 84, lower: 75, upper: 92 },
+      ],
+      executiveDistribution: [
+        { role: "White House", recipients: 4, color: "#3b82f6" },
+        { role: "Election Security", recipients: 3, color: "#22d3ee" },
+        { role: "Media Relations", recipients: 2, color: "#f97316" },
+        { role: "Digital Strategy", recipients: 2, color: "#a855f7" },
+        { role: "Legal", recipients: 2, color: "#10b981" },
+        { role: "Crisis Management", recipients: 3, color: "#ef4444" },
+      ],
+    },
   };
 
   const advertisingBundles = {
@@ -349,9 +611,9 @@
   };
 
   const dashboardTrends = {
-    threat_index: [58, 60, 61, 63, 65, 66, 67],
-    narratives_monitored: [19800, 20500, 21040, 21650, 22380, 23120, 23847],
-    critical_alerts: [11, 13, 12, 15, 17, 16, 18],
+    threat_index: [58, 60, 61, 63, 65, 66, 67, 72, 76, 81, 85, 88, 89],
+    narratives_monitored: [19800, 20500, 21040, 21650, 22380, 23120, 23847, 24200, 24680, 25150, 25580, 26100, 26750],
+    critical_alerts: [11, 13, 12, 15, 17, 16, 18, 22, 25, 28, 31, 34, 38],
   };
 
   class MockApiClient {

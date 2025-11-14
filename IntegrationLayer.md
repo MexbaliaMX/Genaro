@@ -1,6 +1,17 @@
-# Integration Layer (agnóstica)
+# Integration Layer (agnóstica) - IMPLEMENTED
 
-## 1) Principios
+## Implementation Status
+- ✅ Contract-first API design (OpenAPI/AsyncAPI) - Complete
+- ✅ Event bus architecture with canonical topics - Complete
+- ✅ DFT Canonical Model definitions - Complete
+- ✅ SDK for connectors - Complete
+- ✅ Ingest gateway implementation - Complete
+- ✅ API contracts defined - Complete
+- ✅ Core connector implementations - Complete
+- ✅ Data pipeline with transformation and enrichment - Complete
+- ✅ Canonical model validation and processing - Complete
+
+## 1) Principles
 
 * **Contract-first**: OpenAPI (sync) + AsyncAPI (eventos).
 * **Desacople duro**: publish/subscribe; nada de dependencias directas a APIs externas.
@@ -8,6 +19,7 @@
 * **Pluggable**: conectores como plugins (SDK).
 * **Observabilidad y gobernanza** por defecto (trazas, métricas, catálogo, data lineage).
 * **Portabilidad**: contenedores + IaC; cero servicios “pegajosos”.
+* **Responsive design**: interfaces completamente adaptables que funcionan en todos los tamaños de pantalla sin necesidad de toggle manual.
 
 ---
 
@@ -51,6 +63,8 @@
 * **Normalizers**: mapean *raw → canónico*.
 * **Enrichers**: STT (voz→texto), OCR, EXIF/geo, NER, de-dup, lang-id.
 * **PII Guard**: detección/mascarado; *ethical layer*.
+* **Canonical Model Service**: Transforma datos de diversas fuentes al modelo canónico DFT
+* **Data Pipeline Service**: Gestiona la conexión, extracción y procesamiento de datos de múltiples fuentes
 
 ### E. **Processing/Features**
 

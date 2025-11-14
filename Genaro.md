@@ -1,8 +1,22 @@
 Genaro DFT 2.0
 The Predictive Reputation & Strategy Intelligence Platform
+
 Executive Summary
 El panorama digital actual está marcado por la aceleración de narrativas virales, la proliferación de medios sintéticos y la creciente sofisticación de actores maliciosos. La reputación corporativa y la estabilidad de los mercados ya no dependen únicamente de la calidad de los productos o servicios, sino de la capacidad de las organizaciones para anticipar, responder y orquestar estrategias en un entorno de información altamente dinámico.
+
 Genaro DFT 2.0 representa la evolución de las plataformas de Digital Footprint Tracking hacia un sistema predictivo, prescriptivo y agéntico, capaz de transformar datos dispersos en decisiones estratégicas accionables. No se limita a reportar el pasado: simula futuros posibles, prescribe acciones óptimas y ejecuta estrategias con precisión quirúrgica.
+
+Progreso Actual
+La plataforma está en proceso de desarrollo con avances significativos:
+- Implementación completa de la capa de integración con API REST (OpenAPI) y eventos (AsyncAPI)
+- Desarrollo del frontend dinámico con React y TypeScript
+- Implementación de los componentes visuales con Three.js y D3.js
+- Integración de sistemas de seguridad y accesibilidad
+- Configuración de pipelines CI/CD para linting, minificación y optimización
+- Desarrollo de agentes especializados (Percepción, Analítica, Gobernanza)
+- Implementación de modelos ML avanzados (detección de deepfakes, predicción narrativa)
+- Desarrollo del pipeline de datos con transformación al modelo canónico
+- Implementación del sistema de autenticación y autorización RBAC
 Core Paradigm Shift
 Antes (Descriptivo): “La semana pasada el sentimiento negativo aumentó un 20% en redes sociales.”
 Ahora (Predictivo/Prescriptivo): “Genaro ha simulado un escenario de crisis originado en la narrativa X. Existe una probabilidad del 85% de que afecte la confianza del mercado en los próximos 3 días. Se recomienda la acción A, con una eficacia 40% mayor frente a la acción B.”
@@ -15,14 +29,15 @@ Perception Agents: análisis multimodal (texto, imagen, audio, video) con detecc
 Analytics Agents: correlación entre datos financieros, reputacionales y narrativos.
 Content Agents: generación de mensajes estratégicos (desde comunicados de prensa hasta microcontenido social).
 Action Agents: ejecución automatizada en plataformas externas (anuncios, redes sociales, canales de servicio).
-Ethical Guardian Agent: audita de forma continua las acciones y recomendaciones de la flota  
-para garantizar el alineamiento con marcos éticos y de cumplimiento.  
-Reduce el riesgo de errores reputacionales por parte de la IA.  
+Ethical Guardian Agent: audita de forma continua las acciones y recomendaciones de la flota
+para garantizar el alineamiento con marcos éticos y de cumplimiento.
+Reduce el riesgo de errores reputacionales por parte de la IA.
 Detalle operativo en [agents/orchestrator/ethical-guardian-agent.md](agents/orchestrator/ethical-guardian-agent.md).
-Regulatory Watchdog Agent: monitorea proactivamente cambios en legislaciones y normativas relevantes  
-para actualizar las barreras de cumplimiento de los agentes de Contenido y Acción.  
+Regulatory Watchdog Agent: monitorea proactivamente cambios en legislaciones y normativas relevantes
+para actualizar las barreras de cumplimiento de los agentes de Contenido y Acción.
 Más detalles en [agents/orchestrator/regulatory-watchdog-agent.md](agents/orchestrator/regulatory-watchdog-agent.md).
-Orchestrator: el “conductor” que coordina la flota de agentes según los objetivos estratégicos definidos por el usuario.
+Orchestrator: el "conductor" que coordina la flota de agentes según los objetivos estratégicos definidos por el usuario.
+Genaro Agent: el copiloto principal que produce informes, simula respuesta de audiencia y aplica salvaguardias éticas.
 3. Digital Sandbox Studio
 Un entorno simulado donde se pueden probar estrategias antes de aplicarlas:
 Clonación de escenarios: replicación fiel del entorno digital actual.
@@ -42,6 +57,7 @@ Visualizar métricas predictivas.
 Monitorear narrativas en tiempo real.
 Gestionar aprobaciones ejecutivas.
 Interactuar con el sistema vía Comando y Control por Lenguaje Natural, permitiendo a los ejecutivos emitir directivas complejas como "Genaro, diseña tres respuestas a la narrativa emergente, pruébalas en el sandbox y preséntame los resultados en una hora".
+Con autenticación segura y control de acceso basado en roles (RBAC).
 Vertical Applications
 Comunicación y Marketing
 Simulación de lanzamientos de productos.

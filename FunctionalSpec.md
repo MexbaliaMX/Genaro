@@ -1,6 +1,8 @@
 # DFT 2.0 + Genaro — Solution Design & Functional Specifications
 
-## 0) Executive intent
+## 0) Executive Intent - IMPLEMENTED
+
+**Status:** ✅ **IMPLEMENTED** - Classic social sentiment tracking evolved into a **multimodal, narrative-level intelligence platform** that can (1) monitor & explain how stories spread, (2) forecast their trajectory, (3) stress-test counter-messages safely, and (4) do so with **strong governance**.
 
 **Goal:** Evolve classic social sentiment tracking into a **multimodal, narrative-level intelligence platform** that can (1) monitor & explain how stories spread, (2) forecast their trajectory, (3) stress-test counter-messages safely, and (4) do so with **strong governance**.
 **Differentiator:** The **Genaro** agent—an auditable, tool-using copilot that produces briefings, simulates audience response, and enforces ethics guardrails.
@@ -321,20 +323,65 @@
 ## 6) APIs (illustrative)
 
 **Auth:** OAuth2/JWT; scopes per role.
+**Authorization:** Role-based Access Control (RBAC) with permission-based access to endpoints
+**Security:** All endpoints protected with authentication middleware, sensitive operations require specific role permissions
 
+**Authentication APIs:**
+```
+POST /v1/auth/login {username, password} → {access_token, refresh_token, user}
+POST /v1/auth/refresh {refresh_token} → {access_token, user}
+POST /v1/auth/validate → {valid, user}
+POST /v1/auth/logout → {message}
+GET /v1/auth/profile → {user, permissions}
+```
+
+**Narrative and Analytics APIs:**
 ```
 GET /v1/narratives?since=...&locale=...
 GET /v1/narratives/{id}
-GET /v1/narratives/{id}/forecast
-GET /v1/alerts?severity=HIGH
+GET /v1/narratives/{id}/metrics?window=...
+POST /v1/narratives/search {query, since, until, page, page_size} → {results, total}
+GET /v1/metrics/kpis?entity_id=...&entity_type=...&window=...
+```
+
+**Advanced ML Model APIs:**
+```
+POST /v1/ml/deepfake/detect {media_url, media_type} → {is_synthetic, confidence, risk_score, explanation}
+POST /v1/ml/content/analyze {content} → {sentiment, toxicity, emotions, sarcasm_detected, quality_score}
+POST /v1/ml/narrative/detect {content_batch} → {narratives, confidence, topic_keywords}
+POST /v1/ml/forecast/narrative/{narrativeId} {horizon_days, include_confidence} → {volume_predictions, sentiment_predictions, risk_predictions}
+```
+
+**Data Pipeline APIs:**
+```
+POST /v1/pipeline/connect {id, name, type, config} → {sourceId, connected, message}
+POST /v1/pipeline/fetch/{sourceId} {options} → {canonicalData, count}
+POST /v1/pipeline/validate {data} → {valid, errorCount}
+POST /v1/pipeline/transform {rawData, sourceType} → {canonicalData}
+```
+
+**Advertising APIs:**
+```
 GET /v1/advertising/campaigns?platform=...&date_range=...
 GET /v1/advertising/campaigns/{id}/performance?date_range=...
+```
+
+**Sandbox and Genaro APIs:**
+```
 POST /v1/sandbox/simulate {cohorts, messages[]}
-POST /v1/genaro/briefing {scope, timeframe, audience}
+POST /v1/genaro/request {requestType, query, context} → {response_id, content, confidence}
+GET /v1/genaro/response/{requestId}
 POST /v1/genaro/ethics-check {content, audience, purpose}
 ```
 
-**Webhook events:** `AlertCreated`, `NarrativeChanged`, `ForecastUpdated`, `AdSpendUpdated`.
+**Admin/Management APIs:**
+```
+GET /v1/admin/users
+POST /v1/exports/sac {destination, filters} → {job_id, status}
+GET /v1/health → {status, timestamp}
+```
+
+**Webhook events:** `AlertCreated`, `NarrativeChanged`, `ForecastUpdated`, `AdSpendUpdated`, `AnalyticsResults`, `GenaroResponse`.
 
 ---
 
@@ -362,6 +409,10 @@ POST /v1/genaro/ethics-check {content, audience, purpose}
     *   **Secrets Management:** All secrets, such as API keys and passwords, must be stored in a secure secrets vault.
     *   **Network Security:** The system must be protected by a firewall and other network security measures to prevent unauthorized access.
     *   **Vulnerability Scanning:** The system must be regularly scanned for security vulnerabilities, and any identified vulnerabilities must be patched within a defined timeframe based on their severity.
+    *   **Authentication:** Implement OAuth2/JWT with refresh token rotation and proper token expiration policies.
+    *   **Authorization:** Implement Role-Based Access Control (RBAC) with granular permission management per endpoint/functionality.
+    *   **API Security:** All API endpoints must implement authentication, authorization, rate limiting, and input validation to prevent abuse.
+    *   **Audit Logging:** All security-relevant events must be logged for compliance and forensic analysis.
 
 *   **Privacy:**
     *   **Data Protection:** The system must comply with all relevant data protection regulations, such as GDPR and CCPA.
