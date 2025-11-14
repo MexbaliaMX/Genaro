@@ -1,0 +1,479 @@
+// chartRenderer.js - Component for rendering D3 charts
+import { TooltipManager } from '../utils/tooltipManager.js';
+import { dataService } from '../services/dataService.js';
+
+export class ChartRenderer {
+  constructor() {
+    this.tooltipManager = new TooltipManager();
+    this.dataService = dataService;
+    this.BODY_DATA = document.body?.dataset || {};
+    this.DATA_NARRATIVE_ID = this.BODY_DATA.narrativeId || "nar-global-ops";
+    this.DATA_BRAND_ID = this.BODY_DATA.brandId || "brand-genaro";
+    this.ERROR_CONTAINER_MAP = {
+      heatmap: ["dashboard-heatmap"],
+      timeline: ["narrative-timeline"],
+      platform: ["narrative-platform"],
+      sentiment: ["narrative-sentiment"],
+      geo: ["narrative-geo"],
+      riskGraph: ["risk-network"],
+      coordination: ["risk-coordination"],
+      sandbox: ["sandbox-network", "sandbox-audience"],
+      executive: ["exec-distribution", "exec-threatmap", "exec-categories", "exec-timeline", "exec-impact", "exec-forecast"],
+      advertising: ["ads-spend-performance", "ads-channel", "ads-correlation", "ads-budget"],
+    };
+    
+    // Keep references for cleanup
+    this.activeVisualizations = new Map(); // Track active viz for cleanup
+    this.chartLoadFailures = new Set(); // Track failed load attempts
+  }
+
+  async init() {
+    // Initialize chart rendering when DOM is loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => this.hydrateCharts());
+    } else {
+      await this.hydrateCharts();
+    }
+  }
+
+  // Clean up all chart resources
+  destroy() {
+    // Clean up all active visualizations
+    this.activeVisualizations.forEach((viz, selector) => {
+      const container = document.querySelector(selector);
+      if (container) {
+        container.innerHTML = ''; // Clear the container
+      }
+    });
+    this.activeVisualizations.clear();
+    
+    // Clear any other chart resources
+    this.chartLoadFailures.clear();
+    console.log('ChartRenderer resources cleaned up');
+  }
+
+  async hydrateCharts() {
+    // Check if D3 is available
+    if (typeof d3 === "undefined") {
+      console.error("D3 library not loaded - charts will not render");
+      this.showErrorInElement('dashboard-heatmap', 'D3 library not available');
+      this.showErrorInElement('narrative-timeline', 'D3 library not available');
+      this.showErrorInElement('narrative-platform', 'D3 library not available');
+      this.showErrorInElement('narrative-sentiment', 'D3 library not available');
+      this.showErrorInElement('narrative-geo', 'D3 library not available');
+      return;
+    }
+
+    // Initialize tooltip manager for chart tooltips
+    this.tooltipManager.init();
+
+    // Fetch data for dashboard
+    let data;
+    try {
+      data = await this.dataService.getDashboardData(this.DATA_NARRATIVE_ID);
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+      // Try to render even with partial data
+      data = {
+        narratives: [],
+        metrics: [],
+        alerts: [],
+        platformDistribution: [],
+        timeSeries: { data: [] }
+      };
+    }
+
+    // Render narrative globe
+    if (document.getElementById("dashboard-globe")) {
+      // The narrative globe is handled by its own component
+    }
+
+    // Render dashboard heatmap if needed
+    if (document.getElementById("dashboard-heatmap")) {
+      await this.renderWithErrorBoundary('dashboard-heatmap', async () => {
+        await this.renderDashboardHeatmap(data);
+      });
+    }
+
+    // Render other charts as needed
+    this.renderSparklines(data.timeSeries.data);
+  }
+
+  // Error boundary wrapper for chart rendering
+  async renderWithErrorBoundary(containerId, renderFunction) {
+    try {
+      await renderFunction();
+    } catch (error) {
+      console.error(`Error rendering chart for container ${containerId}:`, error);
+      
+      // Show error in the container
+      this.showErrorInElement(containerId, error.message || 'Chart rendering failed');
+      
+      // Track failure to prevent repeated attempts
+      this.chartLoadFailures.add(containerId);
+    }
+  }
+
+  showErrorInElement(containerId, errorMessage) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Clear any existing content
+    container.innerHTML = '';
+
+    // Create error display element
+    const errorEl = document.createElement('div');
+    errorEl.className = 'chart-error-boundary';
+    errorEl.setAttribute('role', 'alert');
+    errorEl.setAttribute('aria-label', `Chart rendering error: ${errorMessage}`);
+
+    errorEl.innerHTML = `
+      <div class="error-content">
+        <div class="error-icon">⚠️</div>
+        <div class="error-message">
+          <h3>Visualization Error</h3>
+          <p>${errorMessage}</p>
+          <button class="retry-button" type="button">Retry Loading</button>
+        </div>
+      </div>
+    `;
+
+    container.appendChild(errorEl);
+
+    // Add CSS for error display if not present
+    if (!document.getElementById('chart-error-styles')) {
+      const style = document.createElement('style');
+      style.id = 'chart-error-styles';
+      style.textContent = `
+        .chart-error-boundary {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          padding: 1.5rem;
+          border-radius: 16px;
+          background: rgba(239, 68, 68, 0.18);
+          color: #fecaca;
+          text-align: center;
+          border: 1px dashed rgba(239, 68, 68, 0.35);
+        }
+        
+        .error-content {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+        
+        .error-icon {
+          font-size: 2rem;
+        }
+        
+        .error-message {
+          text-align: left;
+        }
+        
+        .error-message h3 {
+          margin: 0 0 0.5rem 0;
+          font-size: 1rem;
+          font-weight: 600;
+        }
+        
+        .error-message p {
+          margin: 0 0 1rem 0;
+          font-size: 0.85rem;
+          color: #fca5a5;
+        }
+        
+        .retry-button {
+          background: rgba(239, 68, 68, 0.25);
+          color: #fecaca;
+          border: 1px solid rgba(239, 68, 68, 0.6);
+          padding: 0.4rem 0.8rem;
+          border-radius: 999px;
+          font-size: 0.75rem;
+          cursor: pointer;
+          transition: background 0.2s ease, color 0.2s ease;
+        }
+        
+        .retry-button:hover {
+          background: rgba(239, 68, 68, 0.35);
+          color: #fff;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // Add retry functionality
+    const retryButton = errorEl.querySelector('.retry-button');
+    if (retryButton) {
+      retryButton.addEventListener('click', async () => {
+        // Remove error element
+        errorEl.remove();
+        
+        // Try to rerender the parent component
+        if (containerId === 'dashboard-heatmap') {
+          // Retry fetching data and re-render heatmap
+          try {
+            const data = await this.dataService.getDashboardData(this.DATA_NARRATIVE_ID);
+            await this.renderDashboardHeatmap(data);
+          } catch (error) {
+            this.showErrorInElement(containerId, error.message || 'Retried chart rendering failed');
+          }
+        } else {
+          // For other charts, just clear and show no data
+          container.innerHTML = '';
+          // Add a "No data available" message as fallback
+          const noDataEl = document.createElement('div');
+          noDataEl.textContent = 'No data available';
+          noDataEl.style.display = 'flex';
+          noDataEl.style.alignItems = 'center';
+          noDataEl.style.justifyContent = 'center';
+          noDataEl.style.height = '100%';
+          noDataEl.style.color = 'var(--text-muted)';
+          container.appendChild(noDataEl);
+        }
+      });
+    }
+  }
+
+  async renderDashboardHeatmap(data) {
+    // Get the container
+    const containerId = "dashboard-heatmap";
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Validate the data before rendering
+    if (!data || !Array.isArray(data.metrics)) {
+      this.showErrorInElement(containerId, 'Invalid data format for heatmap');
+      return;
+    }
+
+    try {
+      // Clear any existing content
+      container.innerHTML = "";
+
+      // Example: create a basic SVG-based visualization
+      const width = container.clientWidth || 480;
+      const height = container.clientHeight || 320;
+      const margin = { top: 30, right: 20, bottom: 45, left: 120 };
+
+      // Create SVG element
+      const svg = d3
+        .select(container)
+        .append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .attr("aria-hidden", "true");
+
+      // Example data structure - in real implementation, this would come from the API
+      const categories = ["Politics", "Economy", "Health", "Tech", "Environment"];
+      const regions = ["US", "EU", "APAC", "LATAM"];
+      const exampleData = [];
+      
+      for (const region of regions) {
+        for (const category of categories) {
+          exampleData.push({
+            region,
+            category,
+            value: Math.random() * 100
+          });
+        }
+      }
+
+      // Scales - add validation before creating scales
+      if (categories.length === 0 || regions.length === 0) {
+        throw new Error('No categories or regions to render');
+      }
+
+      const xScale = d3
+        .scaleBand()
+        .domain(categories)
+        .range([margin.left, width - margin.right])
+        .padding(0.12);
+
+      const yScale = d3
+        .scaleBand()
+        .domain(regions)
+        .range([margin.top, height - margin.bottom])
+        .padding(0.18);
+
+      const colorScale = d3
+        .scaleLinear()
+        .domain([0, 100])
+        .range(["#38bdf8", "#ef4444"]);
+
+      // Validate data before drawing
+      if (exampleData.length === 0) {
+        throw new Error('No heatmap data to render');
+      }
+
+      // Draw rectangles for heatmap
+      svg
+        .append("g")
+        .selectAll("rect")
+        .data(exampleData)
+        .join("rect")
+        .attr("x", d => xScale(d.category))
+        .attr("y", d => yScale(d.region))
+        .attr("rx", 8)
+        .attr("ry", 8)
+        .attr("width", xScale.bandwidth())
+        .attr("height", yScale.bandwidth())
+        .attr("fill", d => {
+          if (isNaN(d.value) || d.value == null) {
+            return "#667eea"; // Default color for invalid values
+          }
+          return colorScale(d.value);
+        })
+        .attr("opacity", 0.9)
+        .each(function(d) {
+          // Add tooltip data
+          d3.select(this).attr("data-tippy-content", `<strong>${d.region}</strong><br>${d.category}<br>Activity Index: ${Math.round(d.value)}`);
+        });
+
+      // Add axes - validate scales before creating axes
+      if (xScale.domain().length > 0) {
+        svg
+          .append("g")
+          .attr("transform", `translate(0, ${height - margin.bottom})`)
+          .attr("color", "rgba(148,163,184,0.6)")
+          .call(d3.axisBottom(xScale).tickSize(0))
+          .selectAll("text")
+          .style("font-size", "12px");
+      }
+
+      if (yScale.domain().length > 0) {
+        svg
+          .append("g")
+          .attr("transform", `translate(${margin.left}, 0)`)
+          .attr("color", "rgba(148,163,184,0.6)")
+          .call(d3.axisLeft(yScale).tickSize(0))
+          .selectAll("text")
+          .style("font-size", "12px");
+      }
+
+      // Add title
+      svg
+        .append("text")
+        .attr("x", width / 2)
+        .attr("y", margin.top - 10)
+        .attr("text-anchor", "middle")
+        .attr("fill", "rgba(203, 213, 240, 0.9)")
+        .style("font-size", "14px")
+        .text("Narrative Activity Heatmap");
+
+      // Register the visualization for cleanup purposes
+      this.activeVisualizations.set(`#${containerId}`, { container, svg });
+    } catch (error) {
+      console.error('Error rendering dashboard heatmap:', error);
+      this.showErrorInElement(containerId, error.message || 'Heatmap rendering failed');
+    }
+  }
+
+  renderSparklines(timeSeriesData) {
+    // Render sparklines for metrics
+    document.querySelectorAll("[data-sparkline]").forEach(element => {
+      this.renderSparkline(element, timeSeriesData);
+    });
+  }
+
+  renderSparkline(container, data) {
+    // Get the metric type from the data attribute
+    const metricType = container.getAttribute("data-sparkline");
+    
+    // Create a safe rendering wrapper for sparklines too
+    try {
+      // For demonstration, we'll create a simple line graph
+      const width = 80;
+      const height = 30;
+      
+      // Clear any existing content
+      container.innerHTML = "";
+      
+      // Validate data before rendering
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        // If no data, render a simple static graphic
+        container.innerHTML = `
+          <div style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+            font-size: 0.75rem;
+            color: rgba(226, 232, 240, 0.6);
+          ">
+            <span>No data</span>
+          </div>
+        `;
+        return;
+      }
+      
+      // Use D3 to create a simple sparkline
+      const svg = d3
+        .select(container)
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("viewBox", [0, 0, width, height]);
+      
+      // Validate data points
+      const validData = data.filter(d => typeof d === 'number' && !isNaN(d));
+      
+      if (validData.length > 0) {
+        // Scale data to fit the sparkline
+        const xScale = d3
+          .scaleLinear()
+          .domain([0, validData.length - 1])
+          .range([0, width]);
+          
+        const yScale = d3
+          .scaleLinear()
+          .domain([0, d3.max(validData)])
+          .range([height, 0]);
+        
+        const line = d3
+          .line()
+          .x((d, i) => xScale(i))
+          .y(d => yScale(d))
+          .curve(d3.curveMonotoneX);
+        
+        svg
+          .append("path")
+          .datum(validData)
+          .attr("d", line)
+          .attr("fill", "none")
+          .attr("stroke", "rgba(96, 165, 250, 0.6)")
+          .attr("stroke-width", 2);
+      } else {
+        // Show error state if no valid data
+        svg
+          .append("text")
+          .attr("x", width / 2)
+          .attr("y", height / 2)
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "middle")
+          .attr("fill", "rgba(226, 232, 240, 0.6)")
+          .style("font-size", "10px")
+          .text("No data");
+      }
+    } catch (error) {
+      console.error('Error rendering sparkline:', error);
+      
+      // Display error content
+      container.innerHTML = `
+        <div class="sparkline-error" style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          width: 100%;
+          font-size: 0.75rem;
+          color: rgba(254, 202, 202, 0.7);
+        ">
+          <span>Error</span>
+        </div>
+      `;
+    }
+  }
+}

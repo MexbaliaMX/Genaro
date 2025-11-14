@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for HTML5 for Linux version 5.8.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content=
+  "width=device-width, initial-scale=1.0">
+  <title>Genaro — Unified Command Dashboard</title>
+  <link rel="stylesheet" href="style.min.css">
+</head>
+<body data-page="dashboard" data-narrative-id="nar-trump-ai-propaganda" data-brand-id="brand-genaro" data-api-base-url="http://localhost:3000/api" class="page-shell">
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="top-bar">
+    <div class="brand">
+      <div>
+        <h1>Genaro DFT 2.0</h1><span class="status-pill">Active
+        Monitoring</span>
+      </div><button type="button" class="tour-trigger" data-tour-trigger="">▸
+      Guided Tour</button>
+    </div>
+    <div class="top-bar-actions">
+      <div class="search-bar">
+        <svg width="16" height="16" fill="currentColor"
+        aria-hidden="true" viewBox="0 0 16 16">
+        <title>Search Icon</title>
+        <path d=
+        "M11 6a5 5 0 1 1-1-3.874L10.414 3l.293-.293A1 1 0 0 1 12.414 4l-.293.293L12 4.586l.293.293A1 1 0 0 1 12.414 6l-.293.293L12 6.586l-1.293 1.293A5 5 0 0 1 11 6Z">
+        </path></svg> <input type="search" placeholder=
+        "Ask Genaro to simulate, brief, or execute…" aria-label=
+        "Global command search">
+      </div>
+      <nav class="secondary-nav" aria-label="Primary navigation">
+        <a href="index.html" data-nav="dashboard">Dashboard</a>
+        <a href="narrative-tracker.html" data-nav=
+        "narrative">Narrative Tracker</a> <a href=
+        "risk-integrity.html" data-nav="risk">Risk &amp; Integrity</a>
+        <a href="sandbox-studio.html" data-nav="sandbox">Sandbox
+        Studio</a> <a href="executive-briefing.html" data-nav=
+        "briefing">Executive Briefing</a> <a href=
+        "advertising-dashboard.html" data-nav=
+        "advertising">Advertising Dashboard</a>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
+        <span aria-hidden="true" data-theme-toggle-icon>🌙</span>
+        <span class="sr-only" data-theme-toggle-label>Switch to Light Theme</span>
+      </button>
+      <button class="layout-toggle" type="button" data-layout-toggle aria-pressed="false">
+        <span class="sr-only" data-layout-toggle-label>Expand layout</span>
+        <span aria-hidden="true">⇱</span>
+      </button>
+      <div class="status-pill status-pill--warning">
+        Threat Level: Elevated
+      </div>
+    </div>
+  </header>
+  <main id="main">
+    <section class="grid grid--three">
+      <div class="card" data-tour="threat-index">
+        <h2>Global Threat Index</h2>
+        <div class="flex">
+          <div class="gauge" role="img" aria-label="Global Threat Index: 67 (Elevated)">
+            <div class="gauge-value">
+              <span class="value" aria-hidden="true">67</span> <span class=
+              "pill pill--amber">Elevated</span>
+              <span class="sr-only">Global Threat Index is 67 points (Elevated)</span>
+            </div>
+          </div>
+          <div class="flex-column flex-1-gap">
+            <div class="metric">
+              <div>
+                <div class="metric-value">
+                  +12 pts
+                </div>
+                <div class="metric-trend up">
+                  <span>vs. last 7 days</span>
+                </div>
+              </div>
+              <div class="sparkline sparkline--tiny" data-sparkline="threat_index"></div>
+            </div>
+            <p class="metric-trend flat">Industry Benchmark: 45</p>
+            <div class="gauge-labels">
+              <span>Low</span> <span>Medium</span>
+              <span>Critical</span>
+            </div>
+            <p class="insight-line" aria-label="Escalations summary">
+              Escalations: <strong>5</strong> · Confidence Guardrail: <strong>87%</strong>
+            </p>
+            <p class="sr-only">Threat Index change plus twelve points versus last week. Industry benchmark forty five. Escalations five, confidence guardrail eighty seven percent.</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Narratives Monitored</h2>
+        <div class="metric">
+          <div>
+            <div class="metric-value">
+              23,847
+            </div>
+            <div class="metric-trend up">
+              ▲ 4.3%
+            </div>
+            <p class="metric-trend flat">Active Operations: 18</p>
+          </div>
+          <div class="sparkline" data-sparkline="narratives_monitored" aria-label="Narratives trend"></div>
+        </div>
+        <p class="sr-only">Currently twenty three thousand eight hundred forty seven narratives monitored, up 4.3 percent. Eighteen active operations.</p>
+        <div class="grid legend legend--stacked" aria-label="Narrative segments">
+          <div class="legend-item" data-tippy-content="Emerging narratives represent 52% of total volume">
+            <span class="legend-dot legend-dot--blue" aria-hidden=
+            "true">&nbsp;</span>
+            <div>
+              <strong>Emerging</strong>
+              <p class="metric-trend flat">12,430 narratives</p>
+              <span class="metric-badge">52%</span>
+            </div>
+          </div>
+          <div class="legend-item" data-tippy-content="Volatile narratives account for 37% of observations">
+            <span class="legend-dot legend-dot--orange" aria-hidden=
+            "true">&nbsp;</span>
+            <div>
+              <strong>Volatile</strong>
+              <p class="metric-trend flat">8,710 narratives</p>
+              <span class="metric-badge metric-badge--amber">37%</span>
+            </div>
+          </div>
+          <div class="legend-item" data-tippy-content="Critical narratives currently represent 11% of monitored set">
+            <span class="legend-dot legend-dot--red" aria-hidden=
+            "true">&nbsp;</span>
+            <div>
+              <strong>Critical</strong>
+              <p class="metric-trend flat">2,707 narratives</p>
+              <span class="metric-badge metric-badge--red">11%</span>
+            </div>
+          </div>
+        </div>
+        <div class="tag-cloud" aria-label="Top trending tags">
+          <span>#SupplyChain</span>
+          <span>#EnergyCrisis</span>
+          <span>#ElectionWatch</span>
+          <span>#AICompliance</span>
+        </div>
+        <div class="card-actions">
+          <a class="pill pill--outline-indigo" href="narrative-tracker.html">Open Narrative Tracker</a>
+          <a class="pill pill--outline-indigo" href="executive-briefing.html">Generate Briefing</a>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Critical Alerts</h2>
+        <div class="metric">
+          <div>
+            <div class="metric-value">
+              3 Active
+            </div>
+            <p class="metric-trend flat">Last hour: +1</p>
+          </div>
+          <div class="sparkline sparkline--tiny" data-sparkline="critical_alerts" aria-label="Critical alerts trend"></div>
+        </div>
+        <div class="scroll-section">
+          <article class="alert-item critical">
+            <span class="badge badge--critical">Critical</span>
+            <div>
+              <h3>Deepfake Video Detected — CEO Target</h3>
+              <p>Flagged on YouTube &amp; TikTok | 94% synthetic
+              probability</p>
+            </div><span class="metric-trend flat">12m ago</span>
+          </article>
+          <article class="alert-item">
+            <span class="badge badge--warning">High</span>
+            <div>
+              <h3>Coordinated Bot Activity — Finance Sector</h3>
+              <p>Bot cluster in LATAM | 2.7x amplification
+              velocity</p>
+            </div><span class="metric-trend flat">32m ago</span>
+          </article>
+          <article class="alert-item">
+            <span class="badge badge--warning">High</span>
+            <div>
+              <h3>Disinformation Campaign — Election Narrative</h3>
+              <p>Trending in EU | 5 key influence nodes
+              identified</p>
+            </div><span class="metric-trend flat">51m ago</span>
+          </article>
+        </div>
+        <div class="card-actions">
+          <a class="pill pill--outline-red" href="risk-integrity.html">Open Risk Console</a>
+        </div>
+      </div>
+    </section>
+    <section class="grid grid-cols-2-2fr-1fr">
+      <div class="flex-column gap-sm-1-5rem">
+        <div class="card" data-tour="heatmap">
+          <h2 id="dashboard-globe-title">Global Narrative
+          Current</h2>
+          <div class="three-surface" id="dashboard-globe" role=
+          "img" aria-labelledby="dashboard-globe-title"
+          aria-describedby="dashboard-globe-fallback">
+            <div class="fallback-message" id="dashboard-globe-fallback"
+            data-globe-fallback="" hidden role="status"
+            aria-live="polite">
+              WebGL not available — showing curated insight summary
+              instead.
+            </div>
+          </div>
+        </div>
+        <div class="card min-h-360">
+          <h2>Narrative Activity — Heatmap</h2>
+          <div class="chart-surface chart-surface--loading" id="dashboard-heatmap" role=
+          "img" aria-label="Narrative activity heatmap" aria-busy="true">
+            <div class="loading-indicator" role="status">
+              <span class="spinner" aria-hidden="true"></span>
+              <span class="loading-text">Loading heatmap…</span>
+            </div>
+          </div>
+          <div class="legend">
+            <div class="legend-item">
+              <span class="legend-dot legend-dot--cyan"
+              aria-hidden="true">&nbsp;</span>Low Activity
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot legend-dot--orange"
+              aria-hidden="true">&nbsp;</span>Medium
+            </div>
+            <div class="legend-item">
+              <span class="legend-dot legend-dot--red"
+              aria-hidden="true">&nbsp;</span>High
+            </div>
+          </div>
+        </div>
+      </div>
+      <aside class="card" data-tour="activity">
+        <h2>Real-time Activity Feed</h2>
+        <div class="scroll-section">
+          <div class="activity-item">
+            <div class="activity-meta">
+              <span>Sentiment inversion detected —
+              #SupplyChain</span> <span>Triggered by coordinated
+              post network (45 nodes)</span>
+            </div><span class="pill pill--amber">Under
+            Review</span>
+          </div>
+          <div class="activity-item">
+            <div class="activity-meta">
+              <span>Sandbox Scenario Completed — Pharma
+              Recalls</span> <span>Variant B outperforms baseline
+              by 32%</span>
+            </div><span class="pill pill--green">Ready</span>
+          </div>
+          <div class="activity-item">
+            <div class="activity-meta">
+              <span>Ethics Guardian Escalation — Crisis Brief
+              Draft</span> <span>Awaiting Legal &amp; ESG
+              sign-off</span>
+            </div><span class="pill pill--amber">Pending
+            HITL</span>
+          </div>
+          <div class="activity-item">
+            <div class="activity-meta">
+              <span>AI Orchestrator Completed reroute</span>
+              <span>Playbook applied to APAC investor
+              segment</span>
+            </div><span class="pill pill--green">Executed</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+    <section class="grid grid--four">
+      <div class="card">
+        <h2>Detection Accuracy</h2>
+        <div class="metric">
+          <div>
+            <div class="metric-value">
+              94.7%
+            </div>
+            <div class="metric-trend up">
+              ▲ 1.4%
+            </div>
+          </div>
+          <div class="sparkline">
+            Accuracy Trend
+          </div>
+        </div>
+        <p class="metric-trend flat">24h average confidence</p>
+      </div>
+      <div class="card">
+        <h2>Response Time</h2>
+        <div class="metric">
+          <div>
+            <div class="metric-value">
+              847ms
+            </div>
+            <div class="metric-trend down">
+              ▼ 63ms
+            </div>
+          </div>
+          <div class="sparkline">
+            Latency Trend
+          </div>
+        </div>
+        <p class="metric-trend flat">Genaro orchestration</p>
+      </div>
+      <div class="card">
+        <h2>Active Operations</h2>
+        <div class="metric">
+          <div>
+            <div class="metric-value">
+              18
+            </div>
+            <div class="metric-trend up">
+              ▲ 2
+            </div>
+          </div>
+          <div class="sparkline">
+            Operation Velocity
+          </div>
+        </div>
+        <p class="metric-trend flat">Global orchestrator</p>
+      </div>
+      <div class="card">
+        <h2>System Uptime</h2>
+        <div class="metric">
+          <div>
+            <div class="metric-value">
+              99.97%
+            </div><span class="pill pill--green">Healthy</span>
+          </div>
+          <div class="sparkline">
+            Service Status
+          </div>
+        </div>
+        <p class="metric-trend flat">Across 156 monitored
+        countries</p>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

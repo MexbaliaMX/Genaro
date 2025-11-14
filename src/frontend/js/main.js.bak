@@ -1,0 +1,123 @@
+import { ThemeManager } from './utils/themeManager.js';
+import { LayoutManager } from './utils/layoutManager.js';
+import { AnimationManager } from './utils/animationManager.js';
+import { TooltipManager } from './utils/tooltipManager.js';
+import { TourManager } from './utils/tourManager.js';
+import { ChartRenderer } from './components/chartRenderer.js';
+import { NarrativeGlobe } from './components/narrativeGlobe.js';
+import { mockApiService } from './services/mockApiService.js';
+
+// Make mock API available globally for backward compatibility with existing HTML
+window.MockApiClient = mockApiService;
+
+class GenaroApp {
+  constructor() {
+    this.themeManager = new ThemeManager();
+    this.layoutManager = new LayoutManager();
+    this.animationManager = new AnimationManager();
+    this.tooltipManager = new TooltipManager();
+    this.tourManager = new TourManager();
+    this.chartRenderer = new ChartRenderer();
+    this.narrativeGlobe = new NarrativeGlobe();
+    
+    this.init();
+  }
+
+  async init() {
+    try {
+      // Initialize theme management
+      this.themeManager.init();
+      
+      // Initialize layout management
+      this.layoutManager.init();
+      
+      // Initialize animations
+      this.animationManager.init();
+      
+      // Initialize tooltips
+      this.tooltipManager.init();
+      
+      // Initialize guided tours
+      this.tourManager.init();
+      
+      // Initialize narrative globe visualization
+      this.narrativeGlobe.init();
+      
+      // Initialize chart rendering system
+      await this.chartRenderer.init();
+      
+      // Initialize timestamp updates
+      this.initTimestamps();
+      
+      // Initialize navigation highlighting
+      this.initNavigation();
+      
+      // Initialize segmented controls
+      this.initSegmentedControls();
+      
+      console.log('Genaro DFT 2.0 application initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize Genaro DFT 2.0 application:', error);
+    }
+  }
+
+  initTimestamps() {
+    const timestampNodes = document.querySelectorAll("[data-current-timestamp]");
+    if (timestampNodes.length) {
+      const now = new Date();
+      const formatted = new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZoneName: 'short',
+        hour12: false,
+      }).format(now);
+      
+      timestampNodes.forEach((node) => {
+        node.textContent = formatted;
+      });
+    }
+  }
+
+  initNavigation() {
+    const pageId = document.body.dataset.page;
+    if (pageId) {
+      document.querySelectorAll("[data-nav]").forEach((link) => {
+        const isActive = link.dataset.nav === pageId;
+        link.classList.toggle("is-active", isActive);
+        if (isActive) {
+          link.setAttribute("aria-current", "page");
+        } else {
+          link.removeAttribute("aria-current");
+        }
+      });
+    }
+  }
+
+  initSegmentedControls() {
+    document.querySelectorAll(".segmented-control").forEach((group) => {
+      const buttons = group.querySelectorAll(".segmented-control__option");
+      buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+          buttons.forEach((other) => {
+            other.classList.remove("is-active");
+            other.setAttribute("aria-pressed", "false");
+          });
+          button.classList.add("is-active");
+          button.setAttribute("aria-pressed", "true");
+        });
+      });
+    });
+  }
+}
+
+// Initialize the application when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  new GenaroApp();
+});
+
+// Export for potential use in other modules if needed
+export { GenaroApp };
